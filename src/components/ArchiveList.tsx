@@ -17,7 +17,7 @@ export function ArchiveList({ archive, onCopy, onDelete }: ArchiveListProps) {
         <li key={entry.id} className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="font-gilroy text-sm font-semibold">{entry.name}</p>
+              <p className="font-gilroy text-sm font-bold">{entry.name}</p>
               <p className="mt-1 text-xs text-white/40">{new Date(entry.savedAt).toLocaleString()}</p>
             </div>
             <div className="flex shrink-0 gap-2">

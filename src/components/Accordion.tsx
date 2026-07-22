@@ -23,7 +23,7 @@ export function Accordion({ number, title, subtitle, children }: AccordionProps)
         <span className="flex items-baseline gap-4">
           <span className="font-mono text-sm text-ft-purple">{number}</span>
           <span>
-            <span className="block font-gilroy text-2xl font-semibold">{title}</span>
+            <span className="block font-gilroy text-2xl font-bold">{title}</span>
             <span className="mt-1 block text-sm text-ft-ink/55">{subtitle}</span>
           </span>
         </span>

@@ -27,7 +27,7 @@ export function ApproachPicker({ approach, onSelect }: ApproachPickerProps) {
                 : 'border-ft-ink/15 hover:border-ft-purple/60'
             }`}
           >
-            <h3 className="font-gilroy text-xl font-semibold">{card.title}</h3>
+            <h3 className="font-gilroy text-xl font-bold">{card.title}</h3>
             <p className="mt-2 text-sm text-ft-ink/60">{card.description}</p>
           </button>
         )

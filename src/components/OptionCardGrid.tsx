@@ -23,7 +23,7 @@ export function OptionCardGrid({ field, selectedOptionId, onSelect }: OptionCard
                 active ? 'border-ft-purple bg-ft-purple/5' : 'border-ft-ink/15 hover:border-ft-purple/50'
               }`}
             >
-              <span className="block font-gilroy text-base font-semibold">{option.name}</span>
+              <span className="block font-gilroy text-base font-bold">{option.name}</span>
               <span className="mt-1 block text-sm text-ft-ink/55">{option.description}</span>
             </button>
           )

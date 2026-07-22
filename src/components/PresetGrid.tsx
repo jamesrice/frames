@@ -32,7 +32,7 @@ export function PresetGrid({ presets, selectedPresetId, onSelect }: PresetGridPr
           >
             <div className={`h-24 w-full ${TILE_COLORS[preset.tileColor]}`} aria-hidden="true" />
             <div className="p-5">
-              <h4 className="font-gilroy text-lg font-semibold">{preset.name}</h4>
+              <h4 className="font-gilroy text-lg font-bold">{preset.name}</h4>
               <p className="mt-1 font-mono text-xs text-ft-ink/55">{preset.specString}</p>
             </div>
           </button>
