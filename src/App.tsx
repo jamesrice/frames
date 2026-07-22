@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useReducer } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 import { WORLD } from './data/world'
 import { assemblePrompt } from './lib/assemble'
-import { loadArchive, loadDraft, saveArchive, saveDraft } from './lib/storage'
+import { clearDraft, loadArchive, loadDraft, saveArchive, saveDraft } from './lib/storage'
 import type { Approach, ArchivedPrompt, DraftPayload } from './lib/storage'
 import type { Preset } from './data/world'
 import { Header } from './components/Header'
@@ -11,6 +11,9 @@ import { Accordion } from './components/Accordion'
 import { PresetGrid } from './components/PresetGrid'
 import { TextField } from './components/TextField'
 import { OptionCardGrid } from './components/OptionCardGrid'
+import { PromptRail } from './components/PromptRail'
+
+const CHAR_CAP = 1024
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -115,6 +118,8 @@ function reducer(state: BuilderState, action: Action): BuilderState {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
+  const [tab, setTab] = useState<'draft' | 'archive'>('draft')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     dispatch({ type: 'HYDRATE', draft: loadDraft(), archive: loadArchive() })
@@ -144,6 +149,21 @@ export default function App() {
     () => assemblePrompt({ text: state.text, selections: state.selections }),
     [state.text, state.selections],
   )
+
+  const handleReset = () => {
+    dispatch({ type: 'RESET' })
+    clearDraft()
+  }
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard unavailable — leave the button state unchanged
+    }
+  }
 
   return (
     <div className="min-h-screen bg-ft-beige text-ft-ink">
@@ -191,9 +211,21 @@ export default function App() {
             ))}
           </div>
         </div>
-        <aside className="h-fit rounded-[20px] bg-ft-ink p-6 text-white lg:sticky lg:top-8">
-          <p className="text-white/50">{prompt || 'Nothing conjured yet.'}</p>
-        </aside>
+        <PromptRail
+          prompt={prompt}
+          charCap={CHAR_CAP}
+          capMode={state.capMode}
+          onToggleCapMode={() => dispatch({ type: 'TOGGLE_CAP_MODE' })}
+          onCopy={() => handleCopy(prompt)}
+          onArchive={() => dispatch({ type: 'ARCHIVE_PROMPT', prompt })}
+          onReset={handleReset}
+          copied={copied}
+          tab={tab}
+          onTabChange={setTab}
+          archive={state.archive}
+          onCopyArchived={(entry) => handleCopy(entry.prompt)}
+          onDeleteArchived={(id) => dispatch({ type: 'DELETE_ARCHIVED', id })}
+        />
       </main>
     </div>
   )
