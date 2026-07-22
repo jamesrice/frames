@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "./styles/fonts.css";
+
+@theme {
+  --color-ft-beige: #FEF7ED;
+  --color-ft-ink: #131313;
+  --color-ft-purple: #4C00FF;
+  --color-ft-aqua: #278DD8;
+  --color-ft-blue: #3680F6;
+  --color-ft-red: #FF562F;
+  --color-ft-orange: #D99A01;
+
+  --font-gilroy: 'Gilroy', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+
+  --ease-ft: cubic-bezier(0.13, 0.6, 0.23, 0.98);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ft-beige);
+    color: var(--color-ft-ink);
+    font-family: var(--font-gilroy);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
