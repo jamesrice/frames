@@ -61,7 +61,7 @@ export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSele
             <path
               key={option.id}
               d={path}
-              className={`cursor-pointer stroke-ft-beige transition-colors duration-[250ms] ease-ft ${
+              className={`cursor-pointer stroke-ft-beige outline-none transition-colors duration-[250ms] ease-ft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ft-purple ${
                 active ? 'fill-ft-purple' : 'fill-ft-ink/[0.06] hover:fill-ft-purple/30'
               }`}
               strokeWidth={3}
