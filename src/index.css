@@ -4,6 +4,7 @@
 @theme {
   --color-ft-beige: #FEF7ED;
   --color-ft-ink: #131313;
+  --color-ft-panel: #1C1C1C;
   --color-ft-purple: #4C00FF;
   --color-ft-aqua: #278DD8;
   --color-ft-blue: #3680F6;
@@ -18,8 +19,8 @@
 
 @layer base {
   body {
-    background-color: var(--color-ft-beige);
-    color: var(--color-ft-ink);
+    background-color: var(--color-ft-ink);
+    color: var(--color-ft-beige);
     font-family: var(--font-gilroy);
     -webkit-font-smoothing: antialiased;
   }

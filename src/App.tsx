@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
 import { WORLD } from './data/world'
-import { assemblePrompt } from './lib/assemble'
-import { clearDraft, loadArchive, loadDraft, saveArchive, saveDraft } from './lib/storage'
+import { composePrompt } from './lib/compose'
+import {
+  clearDraft,
+  loadArchive,
+  loadComposeCount,
+  loadDraft,
+  loadIntroSeen,
+  saveArchive,
+  saveComposeCount,
+  saveDraft,
+  saveIntroSeen,
+} from './lib/storage'
 import type { Approach, ArchivedPrompt, DraftPayload } from './lib/storage'
-import type { Preset } from './data/world'
+import type { Field, Preset, Section } from './data/world'
 import { Header } from './components/Header'
-import { Hero } from './components/Hero'
+import { IntroModal } from './components/IntroModal'
 import { ApproachPicker } from './components/ApproachPicker'
 import { Accordion } from './components/Accordion'
 import { PresetGrid } from './components/PresetGrid'
@@ -14,13 +24,17 @@ import { OptionCardGrid } from './components/OptionCardGrid'
 import { IconOptionGrid } from './components/IconOptionGrid'
 import { WheelSelector } from './components/WheelSelector'
 import { Slider } from './components/Slider'
+import { SliderVertical } from './components/SliderVertical'
 import { PromptRail } from './components/PromptRail'
+import type { DraftToken } from './components/PromptRail'
 
 const CHAR_CAP = 1024
+const VERTICAL_SLIDER_PAIR = ['grain', 'filmScan']
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
   hydrated: boolean
+  composed: string | null
 }
 
 type Action =
@@ -31,6 +45,8 @@ type Action =
   | { type: 'TOGGLE_OPTION'; fieldId: string; optionId: string }
   | { type: 'SET_OPTION'; fieldId: string; optionId: string }
   | { type: 'TOGGLE_CAP_MODE' }
+  | { type: 'COMPOSE'; composed: string }
+  | { type: 'CLEAR_COMPOSED' }
   | { type: 'ARCHIVE_PROMPT'; prompt: string }
   | { type: 'DELETE_ARCHIVED'; id: string }
   | { type: 'RESET' }
@@ -64,6 +80,7 @@ function createInitialState(): BuilderState {
     capMode: false,
     archive: [],
     hydrated: false,
+    composed: null,
   }
 }
 
@@ -85,9 +102,10 @@ function reducer(state: BuilderState, action: Action): BuilderState {
         approach: 'prelit',
         presetId: action.preset.id,
         selections: { ...state.selections, ...action.preset.selections },
+        composed: null,
       }
     case 'SET_TEXT':
-      return { ...state, text: { ...state.text, [action.fieldId]: action.value } }
+      return { ...state, text: { ...state.text, [action.fieldId]: action.value }, composed: null }
     case 'TOGGLE_OPTION': {
       const current = state.selections[action.fieldId]
       const next = current === action.optionId ? null : action.optionId
@@ -95,6 +113,7 @@ function reducer(state: BuilderState, action: Action): BuilderState {
         ...state,
         presetId: null,
         selections: { ...state.selections, [action.fieldId]: next },
+        composed: null,
       }
     }
     case 'SET_OPTION':
@@ -102,9 +121,14 @@ function reducer(state: BuilderState, action: Action): BuilderState {
         ...state,
         presetId: null,
         selections: { ...state.selections, [action.fieldId]: action.optionId },
+        composed: null,
       }
     case 'TOGGLE_CAP_MODE':
       return { ...state, capMode: !state.capMode }
+    case 'COMPOSE':
+      return { ...state, composed: action.composed }
+    case 'CLEAR_COMPOSED':
+      return { ...state, composed: null }
     case 'ARCHIVE_PROMPT': {
       const preset = WORLD.presets.find((candidate) => candidate.id === state.presetId)
       const entry: ArchivedPrompt = {
@@ -128,6 +152,8 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
   const [tab, setTab] = useState<'draft' | 'archive'>('draft')
   const [copied, setCopied] = useState(false)
+  const [showIntro, setShowIntro] = useState(() => !loadIntroSeen())
+  const [composeCount, setComposeCount] = useState(() => loadComposeCount())
 
   useEffect(() => {
     dispatch({ type: 'HYDRATE', draft: loadDraft(), archive: loadArchive() })
@@ -153,10 +179,37 @@ export default function App() {
     saveArchive(state.archive)
   }, [state.archive, state.hydrated])
 
-  const prompt = useMemo(
-    () => assemblePrompt({ text: state.text, selections: state.selections }),
-    [state.text, state.selections],
+  const tokens = useMemo<DraftToken[]>(() => {
+    const list: DraftToken[] = []
+    for (const section of WORLD.sections) {
+      for (const field of section.fields) {
+        if (field.kind === 'text') {
+          const value = state.text[field.id]?.trim()
+          if (value) list.push({ fieldId: field.id, label: value.length > 30 ? `${value.slice(0, 30)}…` : value })
+        } else {
+          const optionId = state.selections[field.id]
+          if (!optionId) continue
+          const option = field.options.find((candidate) => candidate.id === optionId)
+          if (option) list.push({ fieldId: field.id, label: option.name })
+        }
+      }
+    }
+    return list
+  }, [state.text, state.selections])
+
+  const totalFields = useMemo(
+    () => WORLD.sections.reduce((count, section) => count + section.fields.length, 0),
+    [],
   )
+
+  const handleCompose = () => {
+    const composed = composePrompt({ text: state.text, selections: state.selections })
+    if (!composed) return
+    dispatch({ type: 'COMPOSE', composed })
+    const next = composeCount + 1
+    setComposeCount(next)
+    saveComposeCount(next)
+  }
 
   const handleReset = () => {
     dispatch({ type: 'RESET' })
@@ -173,84 +226,119 @@ export default function App() {
     }
   }
 
+  const closeIntro = (dontShowAgain: boolean) => {
+    if (dontShowAgain) saveIntroSeen()
+    setShowIntro(false)
+  }
+
+  const renderSelectField = (field: Field) => {
+    if (field.kind === 'text') {
+      return (
+        <TextField
+          key={field.id}
+          field={field}
+          value={state.text[field.id] ?? ''}
+          onChange={(value) => dispatch({ type: 'SET_TEXT', fieldId: field.id, value })}
+        />
+      )
+    }
+
+    const selectedOptionId = state.selections[field.id] ?? null
+
+    if (field.kind === 'slider') {
+      return (
+        <Slider
+          key={field.id}
+          field={field}
+          selectedOptionId={selectedOptionId}
+          onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
+        />
+      )
+    }
+
+    const onSelect = (optionId: string) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })
+
+    if (field.kind === 'wheel') {
+      return (
+        <WheelSelector key={field.id} options={field.options} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+      )
+    }
+
+    if (field.kind === 'icon-options') {
+      return <IconOptionGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+    }
+
+    return <OptionCardGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+  }
+
+  const renderSectionFields = (section: Section) => {
+    const paired = section.fields.filter((field) => VERTICAL_SLIDER_PAIR.includes(field.id))
+    if (paired.length < 2) return section.fields.map(renderSelectField)
+
+    const rest = section.fields.filter((field) => !VERTICAL_SLIDER_PAIR.includes(field.id))
+    return (
+      <>
+        {rest.map(renderSelectField)}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {paired.map((field) =>
+            field.kind !== 'text' ? (
+              <SliderVertical
+                key={field.id}
+                field={field}
+                selectedOptionId={state.selections[field.id] ?? null}
+                onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
+              />
+            ) : null,
+          )}
+        </div>
+      </>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-ft-beige text-ft-ink">
-      <Header />
-      <main className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 px-5 pb-24 pt-8 lg:grid-cols-[1fr_420px]">
+    <div className="min-h-screen bg-ft-ink text-ft-beige">
+      {showIntro && <IntroModal onClose={closeIntro} />}
+      <div className="lg:grid lg:grid-cols-[1fr_440px]">
         <div className="min-w-0">
-          <Hero eyebrow={WORLD.eyebrow} name={WORLD.name} subline={WORLD.subline} />
-          <ApproachPicker
-            approach={state.approach}
-            onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
-          />
-          <div className="mt-10 border-t border-ft-ink/10">
-            {WORLD.sections.map((section) => (
-              <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
-                {section.special === 'presets' && (
-                  <PresetGrid
-                    presets={WORLD.presets}
-                    selectedPresetId={state.presetId}
-                    onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
-                  />
-                )}
-                {section.fields.map((field) => {
-                  if (field.kind === 'text') {
-                    return (
-                      <TextField
-                        key={field.id}
-                        field={field}
-                        value={state.text[field.id] ?? ''}
-                        onChange={(value) => dispatch({ type: 'SET_TEXT', fieldId: field.id, value })}
-                      />
-                    )
-                  }
-
-                  const selectedOptionId = state.selections[field.id] ?? null
-
-                  if (field.kind === 'slider') {
-                    return (
-                      <Slider
-                        key={field.id}
-                        field={field}
-                        selectedOptionId={selectedOptionId}
-                        onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
-                      />
-                    )
-                  }
-
-                  const onSelect = (optionId: string) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })
-
-                  if (field.kind === 'wheel') {
-                    return (
-                      <WheelSelector
-                        key={field.id}
-                        options={field.options}
-                        selectedOptionId={selectedOptionId}
-                        onSelect={onSelect}
-                      />
-                    )
-                  }
-
-                  if (field.kind === 'icon-options') {
-                    return (
-                      <IconOptionGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
-                    )
-                  }
-
-                  return <OptionCardGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
-                })}
-              </Accordion>
-            ))}
-          </div>
+          <Header composeCount={composeCount} onReset={handleReset} onShowIntro={() => setShowIntro(true)} />
+          <main className="px-6 pb-24 lg:px-10">
+            <section className="border-t border-white/10 pt-6">
+              <h2 className="font-gilroy text-2xl font-bold uppercase tracking-[0.08em]">The Approach</h2>
+              <div className="mt-5">
+                <ApproachPicker
+                  approach={state.approach}
+                  onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
+                />
+              </div>
+            </section>
+            <div className="mt-8 border-t border-white/10">
+              {WORLD.sections.map((section) => (
+                <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
+                  {section.special === 'presets' && (
+                    <PresetGrid
+                      presets={WORLD.presets}
+                      selectedPresetId={state.presetId}
+                      onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
+                    />
+                  )}
+                  {renderSectionFields(section)}
+                </Accordion>
+              ))}
+            </div>
+          </main>
         </div>
         <PromptRail
-          prompt={prompt}
+          tokens={tokens}
+          filled={tokens.length}
+          total={totalFields}
+          composed={state.composed}
           charCap={CHAR_CAP}
           capMode={state.capMode}
           onToggleCapMode={() => dispatch({ type: 'TOGGLE_CAP_MODE' })}
-          onCopy={() => handleCopy(prompt)}
-          onArchive={() => dispatch({ type: 'ARCHIVE_PROMPT', prompt })}
-          onReset={handleReset}
+          onCompose={handleCompose}
+          onEditDraft={() => dispatch({ type: 'CLEAR_COMPOSED' })}
+          onCopy={() => state.composed && handleCopy(state.composed)}
+          onArchive={() => state.composed && dispatch({ type: 'ARCHIVE_PROMPT', prompt: state.composed })}
           copied={copied}
           tab={tab}
           onTabChange={setTab}
@@ -258,7 +346,7 @@ export default function App() {
           onCopyArchived={(entry) => handleCopy(entry.prompt)}
           onDeleteArchived={(id) => dispatch({ type: 'DELETE_ARCHIVED', id })}
         />
-      </main>
+      </div>
     </div>
   )
 }

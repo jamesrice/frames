@@ -16,7 +16,7 @@ const TILE_COLORS: Record<Preset['tileColor'], string> = {
 
 export function PresetGrid({ presets, selectedPresetId, onSelect }: PresetGridProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {presets.map((preset) => {
         const active = preset.id === selectedPresetId
         return (
@@ -25,21 +25,21 @@ export function PresetGrid({ presets, selectedPresetId, onSelect }: PresetGridPr
             type="button"
             onClick={() => onSelect(preset)}
             aria-pressed={active}
-            className={`overflow-hidden rounded-[20px] border text-left transition-all duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 ${
-              active
-                ? 'border-ft-purple shadow-[0_10px_25px_rgba(76,0,255,0.12)]'
-                : 'border-ft-ink/15 hover:border-ft-purple/60'
+            className={`overflow-hidden rounded-[6px] border text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60 ${
+              active ? 'border-ft-purple' : 'border-white/10 hover:border-ft-purple/60'
             }`}
           >
             <div
-              className={`flex h-24 w-full items-center justify-center text-white ${TILE_COLORS[preset.tileColor]}`}
+              className={`flex aspect-[4/3] w-full items-center justify-center text-white ${TILE_COLORS[preset.tileColor]}`}
               aria-hidden="true"
             >
               <Icon name={preset.icon} className="h-8 w-8" />
             </div>
-            <div className="p-5">
-              <h4 className="font-gilroy text-lg font-bold">{preset.name}</h4>
-              <p className="mt-1 font-mono text-xs text-ft-ink/55">{preset.specString}</p>
+            <div className="bg-white/5 p-3">
+              <h4 className={`font-mono text-xs font-bold uppercase tracking-[0.08em] ${active ? 'text-ft-purple' : ''}`}>
+                {preset.name}
+              </h4>
+              <p className="mt-1 font-mono text-[10px] leading-relaxed text-white/35">{preset.specString}</p>
             </div>
           </button>
         )

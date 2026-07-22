@@ -42,6 +42,7 @@ export interface TextField {
   label: string
   hint: string
   placeholder: string
+  helper?: string
 }
 
 export type SelectKind = 'options' | 'icon-options' | 'wheel' | 'slider'
@@ -106,6 +107,8 @@ export const WORLD: World = {
         depthOfField: 'shallow-f2-8',
         filmStock: 'portra-400',
         grain: 'fine',
+        filmScan: 'balanced-scan',
+        era: '1990s',
       },
     },
     {
@@ -125,6 +128,8 @@ export const WORLD: World = {
         depthOfField: 'shallow-f2-8',
         filmStock: 'cinestill-800t',
         grain: 'pronounced',
+        filmScan: 'rough-analog',
+        era: 'y2k',
       },
     },
     {
@@ -144,6 +149,8 @@ export const WORLD: World = {
         depthOfField: 'balanced-f5-6',
         filmStock: 'fuji-superia-400',
         grain: 'clean',
+        filmScan: 'balanced-scan',
+        era: '1970s',
       },
     },
     {
@@ -163,6 +170,8 @@ export const WORLD: World = {
         depthOfField: 'balanced-f5-6',
         filmStock: 'tri-x-400',
         grain: 'fine',
+        filmScan: 'clean-digital',
+        era: '1960s',
       },
     },
     {
@@ -182,6 +191,8 @@ export const WORLD: World = {
         depthOfField: 'wide-open-f1-4',
         filmStock: 'ilford-hp5-plus',
         grain: 'heavy-push',
+        filmScan: 'rough-analog',
+        era: '1990s',
       },
     },
     {
@@ -201,6 +212,50 @@ export const WORLD: World = {
         depthOfField: 'deep-focus-f11',
         filmStock: 'portra-400',
         grain: 'clean',
+        filmScan: 'clean-digital',
+        era: 'present-day',
+      },
+    },
+    {
+      id: 'boardwalk-summer',
+      name: 'Boardwalk Summer',
+      specString: 'Contax T2 · f/5.6 · Superia 400',
+      tileColor: 'orange',
+      icon: 'sun-hard',
+      selections: {
+        humanMoment: 'caught-mid-laugh',
+        style: 'sun-bleached-nostalgia',
+        timeOfDay: 'midday',
+        light: 'hard-midday-sun',
+        cameraAngle: 'straight-on',
+        framing: 'full-figure',
+        cameraBody: 'contax-t2',
+        depthOfField: 'balanced-f5-6',
+        filmStock: 'fuji-superia-400',
+        grain: 'fine',
+        filmScan: 'balanced-scan',
+        era: '1980s',
+      },
+    },
+    {
+      id: 'last-call',
+      name: 'Last Call',
+      specString: 'Nikon FM2 · f/1.4 · HP5 Plus',
+      tileColor: 'red',
+      icon: 'bulb',
+      selections: {
+        humanMoment: 'hand-on-the-glass',
+        style: 'grainy-verite',
+        timeOfDay: 'night',
+        light: 'practical-bulb-glow',
+        cameraAngle: 'profile',
+        framing: 'close-up',
+        cameraBody: 'nikon-fm2',
+        depthOfField: 'wide-open-f1-4',
+        filmStock: 'ilford-hp5-plus',
+        grain: 'heavy-push',
+        filmScan: 'rough-analog',
+        era: '1970s',
       },
     },
   ],
@@ -225,6 +280,8 @@ export const WORLD: World = {
           label: 'Subject',
           hint: 'Who or what the frame is about.',
           placeholder: 'A woman in a raincoat, a corner newsstand, a parked motorcycle…',
+          helper:
+            'Tip — name a recurring character or product here, then pair the composed prompt with your own reference image in your model of choice.',
         },
         {
           kind: 'text',

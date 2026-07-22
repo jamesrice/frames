@@ -15,8 +15,10 @@ export interface ArchivedPrompt {
   savedAt: number
 }
 
-const DRAFT_KEY = 'frames.draft.v1'
+const DRAFT_KEY = 'frames.draft.v2'
 const ARCHIVE_KEY = 'frames.archive.v1'
+const INTRO_KEY = 'frames.introSeen.v1'
+const COMPOSE_COUNT_KEY = 'frames.composeCount.v1'
 
 export function loadDraft(): DraftPayload | null {
   try {
@@ -58,6 +60,40 @@ export function loadArchive(): ArchivedPrompt[] {
 export function saveArchive(archive: ArchivedPrompt[]): void {
   try {
     window.localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archive))
+  } catch {
+    // no-op
+  }
+}
+
+export function loadIntroSeen(): boolean {
+  try {
+    return window.localStorage.getItem(INTRO_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+export function saveIntroSeen(): void {
+  try {
+    window.localStorage.setItem(INTRO_KEY, 'true')
+  } catch {
+    // no-op
+  }
+}
+
+export function loadComposeCount(): number {
+  try {
+    const raw = window.localStorage.getItem(COMPOSE_COUNT_KEY)
+    const parsed = raw ? Number.parseInt(raw, 10) : 0
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+  } catch {
+    return 0
+  }
+}
+
+export function saveComposeCount(count: number): void {
+  try {
+    window.localStorage.setItem(COMPOSE_COUNT_KEY, String(count))
   } catch {
     // no-op
   }

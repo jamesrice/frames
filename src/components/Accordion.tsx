@@ -8,27 +8,25 @@ interface AccordionProps {
 }
 
 export function Accordion({ number, title, subtitle, children }: AccordionProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const panelId = `accordion-panel-${number}`
 
   return (
-    <div className="border-b border-ft-ink/10 py-6">
+    <div className="border-b border-white/10 py-6">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-start justify-between gap-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50"
+        className="flex w-full items-baseline justify-between gap-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50"
       >
-        <span className="flex items-baseline gap-4">
+        <span className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span className="font-mono text-sm text-ft-purple">{number}</span>
-          <span>
-            <span className="block font-gilroy text-2xl font-bold">{title}</span>
-            <span className="mt-1 block text-sm text-ft-ink/55">{subtitle}</span>
-          </span>
+          <span className="font-gilroy text-2xl font-bold uppercase tracking-[0.08em]">{title}</span>
+          <span className="text-sm text-white/35">{subtitle}</span>
         </span>
         <span
-          className={`mt-2 shrink-0 text-2xl font-light transition-transform duration-[250ms] ease-ft ${
+          className={`shrink-0 font-mono text-xl text-white/50 transition-transform duration-[250ms] ease-ft ${
             open ? 'rotate-45' : ''
           }`}
           aria-hidden="true"

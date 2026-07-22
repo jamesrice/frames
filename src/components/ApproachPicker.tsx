@@ -6,13 +6,13 @@ interface ApproachPickerProps {
 }
 
 const CARDS: { id: Approach; title: string; description: string }[] = [
-  { id: 'prelit', title: 'Pre-Lit', description: 'Start from a curated look and adjust what you like.' },
-  { id: 'manual', title: 'Manual Setup', description: 'Build the frame field by field, from nothing.' },
+  { id: 'prelit', title: 'Pre-Lit', description: 'Start from a curated look. Adjust and build from there.' },
+  { id: 'manual', title: 'Manual Setup', description: 'A blank slate — you set the lights and dial every control.' },
 ]
 
 export function ApproachPicker({ approach, onSelect }: ApproachPickerProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {CARDS.map((card) => {
         const active = approach === card.id
         return (
@@ -21,14 +21,14 @@ export function ApproachPicker({ approach, onSelect }: ApproachPickerProps) {
             type="button"
             onClick={() => onSelect(card.id)}
             aria-pressed={active}
-            className={`rounded-[20px] border p-6 text-left transition-all duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 ${
+            className={`rounded-[6px] border px-5 py-4 text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
               active
-                ? 'border-ft-purple bg-ft-purple/5 shadow-[0_10px_25px_rgba(76,0,255,0.12)]'
-                : 'border-ft-ink/15 hover:border-ft-purple/60'
+                ? 'border-ft-purple bg-ft-purple text-white'
+                : 'border-white/10 bg-white/5 text-white/60 hover:border-ft-purple/60'
             }`}
           >
-            <h3 className="font-gilroy text-xl font-bold">{card.title}</h3>
-            <p className="mt-2 text-sm text-ft-ink/60">{card.description}</p>
+            <span className="block font-mono text-sm font-bold uppercase tracking-[0.12em]">{card.title}</span>
+            <span className={`mt-1 block text-sm ${active ? 'text-white/80' : 'text-white/40'}`}>{card.description}</span>
           </button>
         )
       })}

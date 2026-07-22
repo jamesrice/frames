@@ -61,8 +61,8 @@ export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSele
             <path
               key={option.id}
               d={path}
-              className={`cursor-pointer stroke-ft-beige outline-none transition-colors duration-[250ms] ease-ft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ft-purple ${
-                active ? 'fill-ft-purple' : 'fill-ft-ink/[0.06] hover:fill-ft-purple/30'
+              className={`cursor-pointer stroke-ft-ink outline-none transition-colors duration-[250ms] ease-ft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ft-purple ${
+                active ? 'fill-ft-purple' : 'fill-white/10 hover:fill-ft-purple/40'
               }`}
               strokeWidth={3}
               onClick={() => onSelect(option.id)}
@@ -78,8 +78,14 @@ export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSele
             />
           )
         })}
-        <circle cx={CENTER} cy={CENTER} r={INNER_R - 5} className="fill-ft-beige" />
-        <text x={CENTER} y={CENTER} textAnchor="middle" dominantBaseline="middle" className="fill-ft-ink font-gilroy text-xs font-bold">
+        <circle cx={CENTER} cy={CENTER} r={INNER_R - 5} className="fill-ft-purple" />
+        <text
+          x={CENTER}
+          y={CENTER}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-white font-mono text-[10px] font-bold uppercase tracking-[0.08em]"
+        >
           {centerLines.map((line, index) => (
             <tspan key={line} x={CENTER} dy={index === 0 ? `${-(centerLines.length - 1) * 0.6}em` : '1.2em'}>
               {line}
@@ -97,7 +103,9 @@ export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSele
                 onClick={() => onSelect(option.id)}
                 aria-pressed={active}
                 className={`w-full rounded-full border px-3 py-2 text-left font-mono text-[11px] uppercase tracking-[0.06em] transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 ${
-                  active ? 'border-ft-purple bg-ft-purple text-white' : 'border-ft-ink/15 text-ft-ink/70 hover:border-ft-purple/60'
+                  active
+                    ? 'border-ft-purple bg-ft-purple text-white'
+                    : 'border-white/15 text-white/60 hover:border-ft-purple/60'
                 }`}
               >
                 {option.name}
