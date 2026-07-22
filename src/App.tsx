@@ -6,6 +6,7 @@ import type { Approach, ArchivedPrompt, DraftPayload } from './lib/storage'
 import type { Preset } from './data/world'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
+import { ApproachPicker } from './components/ApproachPicker'
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -146,6 +147,10 @@ export default function App() {
       <main className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 px-5 pb-24 pt-8 lg:grid-cols-[1fr_420px]">
         <div className="min-w-0">
           <Hero eyebrow={WORLD.eyebrow} name={WORLD.name} subline={WORLD.subline} />
+          <ApproachPicker
+            approach={state.approach}
+            onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
+          />
         </div>
         <aside className="h-fit rounded-[20px] bg-ft-ink p-6 text-white lg:sticky lg:top-8">
           <p className="text-white/50">{prompt || 'Nothing conjured yet.'}</p>
