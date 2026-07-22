@@ -10,6 +10,7 @@ import { ApproachPicker } from './components/ApproachPicker'
 import { Accordion } from './components/Accordion'
 import { PresetGrid } from './components/PresetGrid'
 import { TextField } from './components/TextField'
+import { OptionCardGrid } from './components/OptionCardGrid'
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -172,6 +173,17 @@ export default function App() {
                         field={field}
                         value={state.text[field.id] ?? ''}
                         onChange={(value) => dispatch({ type: 'SET_TEXT', fieldId: field.id, value })}
+                      />
+                    ) : null,
+                  )}
+                {section.kind === 'options' &&
+                  section.fields.map((field) =>
+                    field.kind === 'options' ? (
+                      <OptionCardGrid
+                        key={field.id}
+                        field={field}
+                        selectedOptionId={state.selections[field.id] ?? null}
+                        onSelect={(optionId) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })}
                       />
                     ) : null,
                   )}
