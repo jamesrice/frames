@@ -8,6 +8,7 @@ import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { ApproachPicker } from './components/ApproachPicker'
 import { Accordion } from './components/Accordion'
+import { PresetGrid } from './components/PresetGrid'
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -155,7 +156,13 @@ export default function App() {
           <div className="mt-10 border-t border-ft-ink/10">
             {WORLD.sections.map((section) => (
               <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
-                <p className="text-sm text-ft-ink/40">Section content coming in the next task.</p>
+                {section.kind === 'presets' && (
+                  <PresetGrid
+                    presets={WORLD.presets}
+                    selectedPresetId={state.presetId}
+                    onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
+                  />
+                )}
               </Accordion>
             ))}
           </div>
