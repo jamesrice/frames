@@ -1,7 +1,7 @@
-import type { OptionsField } from '../data/world'
+import type { SelectField } from '../data/world'
 
 interface OptionCardGridProps {
-  field: OptionsField
+  field: SelectField
   selectedOptionId: string | null
   onSelect: (optionId: string) => void
 }

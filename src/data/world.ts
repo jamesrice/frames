@@ -1,8 +1,39 @@
+export type IconName =
+  | 'sun'
+  | 'sun-hard'
+  | 'moon'
+  | 'cloud'
+  | 'bolt'
+  | 'window'
+  | 'bulb'
+  | 'arrow-right'
+  | 'arrow-diagonal'
+  | 'circle-half'
+  | 'arrow-up'
+  | 'arrow-down'
+  | 'tilt'
+  | 'frame-1'
+  | 'frame-2'
+  | 'frame-3'
+  | 'frame-4'
+  | 'person'
+  | 'frame-wide'
+  | 'film-color'
+  | 'film-bw'
+  | 'camera-rangefinder'
+  | 'camera-slr'
+  | 'camera-mf'
+  | 'aperture-1'
+  | 'aperture-2'
+  | 'aperture-3'
+  | 'aperture-4'
+
 export interface Option {
   id: string
   name: string
   description: string
   phrase: string
+  icon?: IconName
 }
 
 export interface TextField {
@@ -13,23 +44,23 @@ export interface TextField {
   placeholder: string
 }
 
-export interface OptionsField {
-  kind: 'options'
+export type SelectKind = 'options' | 'icon-options' | 'wheel' | 'slider'
+
+export interface SelectField {
+  kind: SelectKind
   id: string
   label: string
   options: Option[]
 }
 
-export type Field = TextField | OptionsField
-
-export type SectionKind = 'presets' | 'text' | 'options'
+export type Field = TextField | SelectField
 
 export interface Section {
   id: string
   number: string
   title: string
   subtitle: string
-  kind: SectionKind
+  special?: 'presets'
   fields: Field[]
 }
 
@@ -38,6 +69,7 @@ export interface Preset {
   name: string
   specString: string
   tileColor: 'aqua' | 'blue' | 'red' | 'orange'
+  icon: IconName
   selections: Record<string, string>
 }
 
@@ -62,11 +94,14 @@ export const WORLD: World = {
       name: 'Golden Hour Portrait',
       specString: 'Leica M6 · f/2.8 · Portra 400',
       tileColor: 'aqua',
+      icon: 'sun',
       selections: {
         humanMoment: 'caught-mid-laugh',
         style: 'documentary-realism',
+        timeOfDay: 'golden-hour',
         light: 'golden-hour-spill',
-        composition: 'rule-of-thirds',
+        cameraAngle: 'three-quarter',
+        framing: 'medium-close-up',
         cameraBody: 'leica-m6',
         depthOfField: 'shallow-f2-8',
         filmStock: 'portra-400',
@@ -78,11 +113,14 @@ export const WORLD: World = {
       name: 'Neon Noir Street',
       specString: 'Contax T2 · f/2.8 · Cinestill 800T',
       tileColor: 'blue',
+      icon: 'moon',
       selections: {
         humanMoment: 'stolen-glance',
         style: 'high-contrast-noir',
+        timeOfDay: 'night',
         light: 'neon-wet-street',
-        composition: 'leading-lines',
+        cameraAngle: 'low-angle',
+        framing: 'medium-shot',
         cameraBody: 'contax-t2',
         depthOfField: 'shallow-f2-8',
         filmStock: 'cinestill-800t',
@@ -94,11 +132,14 @@ export const WORLD: World = {
       name: 'Sun-Bleached Memory',
       specString: 'Nikon FM2 · f/5.6 · Superia 400',
       tileColor: 'orange',
+      icon: 'sun',
       selections: {
         humanMoment: 'walking-away',
         style: 'sun-bleached-nostalgia',
+        timeOfDay: 'midday',
         light: 'hard-midday-sun',
-        composition: 'negative-space-left',
+        cameraAngle: 'straight-on',
+        framing: 'wide-shot',
         cameraBody: 'nikon-fm2',
         depthOfField: 'balanced-f5-6',
         filmStock: 'fuji-superia-400',
@@ -110,11 +151,14 @@ export const WORLD: World = {
       name: 'Editorial Quiet',
       specString: 'Hasselblad 500C · f/5.6 · Tri-X 400',
       tileColor: 'red',
+      icon: 'window',
       selections: {
         humanMoment: 'quiet-aside',
         style: 'muted-editorial',
+        timeOfDay: 'morning',
         light: 'window-light-portrait',
-        composition: 'frame-within-a-frame',
+        cameraAngle: 'profile',
+        framing: 'close-up',
         cameraBody: 'hasselblad-500c',
         depthOfField: 'balanced-f5-6',
         filmStock: 'tri-x-400',
@@ -126,11 +170,14 @@ export const WORLD: World = {
       name: 'Vérité Handheld',
       specString: 'Leica M6 · f/1.4 · HP5 Plus',
       tileColor: 'aqua',
+      icon: 'film-bw',
       selections: {
         humanMoment: 'caught-mid-laugh',
         style: 'grainy-verite',
+        timeOfDay: 'dusk',
         light: 'practical-bulb-glow',
-        composition: 'dead-center-symmetry',
+        cameraAngle: 'three-quarter',
+        framing: 'medium-shot',
         cameraBody: 'leica-m6',
         depthOfField: 'wide-open-f1-4',
         filmStock: 'ilford-hp5-plus',
@@ -142,11 +189,14 @@ export const WORLD: World = {
       name: 'Cinematic Wide',
       specString: 'Pentax 67 · f/11 · Portra 400',
       tileColor: 'blue',
+      icon: 'aperture-1',
       selections: {
         humanMoment: 'lit-by-a-match',
         style: 'cinematic-wide',
+        timeOfDay: 'blue-hour',
         light: 'overcast-softbox',
-        composition: 'low-angle-hero',
+        cameraAngle: 'high-angle',
+        framing: 'wide-shot',
         cameraBody: 'pentax-67',
         depthOfField: 'deep-focus-f11',
         filmStock: 'portra-400',
@@ -160,7 +210,7 @@ export const WORLD: World = {
       number: '01',
       title: 'Presets',
       subtitle: 'Start from a look someone already dialed in.',
-      kind: 'presets',
+      special: 'presets',
       fields: [],
     },
     {
@@ -168,7 +218,6 @@ export const WORLD: World = {
       number: '02',
       title: 'The Scene',
       subtitle: 'What is actually happening in the frame.',
-      kind: 'text',
       fields: [
         {
           kind: 'text',
@@ -205,10 +254,9 @@ export const WORLD: World = {
       number: '03',
       title: 'Human Moment',
       subtitle: 'The gesture that makes it feel real.',
-      kind: 'options',
       fields: [
         {
-          kind: 'options',
+          kind: 'wheel',
           id: 'humanMoment',
           label: 'Human Moment',
           options: [
@@ -227,12 +275,11 @@ export const WORLD: World = {
       number: '04',
       title: 'Style',
       subtitle: 'The overall photographic treatment.',
-      kind: 'options',
       fields: [
         {
           kind: 'options',
           id: 'style',
-          label: 'Style',
+          label: 'Style Realism',
           options: [
             { id: 'documentary-realism', name: 'Documentary Realism', description: 'Unposed, observational, nothing arranged for the camera.', phrase: 'documentary realism, unposed and observational' },
             { id: 'high-contrast-noir', name: 'High-Contrast Noir', description: 'Deep blacks, blown highlights, shadows doing the storytelling.', phrase: 'high-contrast noir styling, deep blacks and blown highlights' },
@@ -248,20 +295,32 @@ export const WORLD: World = {
       id: 'light',
       number: '05',
       title: 'Light',
-      subtitle: 'Where the light is coming from and how hard it hits.',
-      kind: 'options',
+      subtitle: 'When the light falls, and how hard it hits.',
       fields: [
         {
-          kind: 'options',
-          id: 'light',
-          label: 'Light',
+          kind: 'slider',
+          id: 'timeOfDay',
+          label: 'Time of Day',
           options: [
-            { id: 'golden-hour-spill', name: 'Golden Hour Spill', description: 'Low sun pouring in sideways, everything rimmed in warmth.', phrase: 'golden hour light spilling in low and warm' },
-            { id: 'hard-midday-sun', name: 'Hard Midday Sun', description: 'Short shadows, bleached highlights, no mercy.', phrase: 'hard midday sun with short shadows and bleached highlights' },
-            { id: 'neon-wet-street', name: 'Neon Wet Street', description: 'Signage bleeding color into rain-slicked pavement.', phrase: 'neon signage bleeding color across a wet street' },
-            { id: 'window-light-portrait', name: 'Window Light Portrait', description: 'Soft directional light off to one side, the rest falling to shadow.', phrase: 'soft window light falling from one side' },
-            { id: 'overcast-softbox', name: 'Overcast Softbox', description: 'The whole sky as one giant diffuser.', phrase: 'even, overcast light acting as a natural softbox' },
-            { id: 'practical-bulb-glow', name: 'Practical Bulb Glow', description: 'A bare bulb or table lamp doing all the work.', phrase: 'warm practical bulb glow as the only light source' },
+            { id: 'blue-hour', name: 'Blue Hour', description: 'Just before sunrise.', phrase: 'during blue hour, just before sunrise' },
+            { id: 'morning', name: 'Morning', description: 'Soft, low, and cool.', phrase: 'in the soft light of morning' },
+            { id: 'midday', name: 'Midday', description: 'High sun, short shadows.', phrase: 'at midday' },
+            { id: 'golden-hour', name: 'Golden Hour', description: 'Low sun, warm and long.', phrase: 'during golden hour' },
+            { id: 'dusk', name: 'Dusk', description: 'The last color draining from the sky.', phrase: 'at dusk, the last color draining from the sky' },
+            { id: 'night', name: 'Night', description: 'Artificial light only.', phrase: 'at night' },
+          ],
+        },
+        {
+          kind: 'icon-options',
+          id: 'light',
+          label: 'Light Quality',
+          options: [
+            { id: 'golden-hour-spill', name: 'Golden Hour Spill', description: 'Low sun pouring in sideways, everything rimmed in warmth.', phrase: 'golden hour light spilling in low and warm', icon: 'sun' },
+            { id: 'hard-midday-sun', name: 'Hard Midday Sun', description: 'Short shadows, bleached highlights, no mercy.', phrase: 'hard midday sun with short shadows and bleached highlights', icon: 'sun-hard' },
+            { id: 'neon-wet-street', name: 'Neon Wet Street', description: 'Signage bleeding color into rain-slicked pavement.', phrase: 'neon signage bleeding color across a wet street', icon: 'bolt' },
+            { id: 'window-light-portrait', name: 'Window Light Portrait', description: 'Soft directional light off to one side, the rest falling to shadow.', phrase: 'soft window light falling from one side', icon: 'window' },
+            { id: 'overcast-softbox', name: 'Overcast Softbox', description: 'The whole sky as one giant diffuser.', phrase: 'even, overcast light acting as a natural softbox', icon: 'cloud' },
+            { id: 'practical-bulb-glow', name: 'Practical Bulb Glow', description: 'A bare bulb or table lamp doing all the work.', phrase: 'warm practical bulb glow as the only light source', icon: 'bulb' },
           ],
         },
       ],
@@ -270,20 +329,32 @@ export const WORLD: World = {
       id: 'composition',
       number: '06',
       title: 'Composition',
-      subtitle: 'How the frame is built.',
-      kind: 'options',
+      subtitle: 'The angle on the subject, and how tight the frame sits.',
       fields: [
         {
-          kind: 'options',
-          id: 'composition',
-          label: 'Composition',
+          kind: 'icon-options',
+          id: 'cameraAngle',
+          label: 'Camera Angle',
           options: [
-            { id: 'rule-of-thirds', name: 'Rule of Thirds', description: 'Subject off-center, breathing room on the open side.', phrase: 'rule-of-thirds composition with subject off-center' },
-            { id: 'dead-center-symmetry', name: 'Dead Center Symmetry', description: 'Subject locked in the middle, everything else in balance around it.', phrase: 'dead-center symmetrical composition' },
-            { id: 'negative-space-left', name: 'Negative Space Left', description: 'The subject small, the empty half of the frame doing the talking.', phrase: 'generous negative space to the left of the subject' },
-            { id: 'leading-lines', name: 'Leading Lines', description: 'Architecture or road pulling the eye straight to the subject.', phrase: 'leading lines drawing the eye toward the subject' },
-            { id: 'frame-within-a-frame', name: 'Frame Within a Frame', description: 'Shot through a doorway, window, or arch.', phrase: 'framed within a doorway or window, a frame within the frame' },
-            { id: 'low-angle-hero', name: 'Low Angle Hero', description: 'Camera low, subject looming large against the sky.', phrase: 'low-angle hero framing, subject looming against the sky' },
+            { id: 'straight-on', name: 'Straight On', description: 'Shot at eye level, no tilt.', phrase: 'shot straight-on at eye level', icon: 'arrow-right' },
+            { id: 'three-quarter', name: 'Three-Quarter', description: 'Turned partway from the camera.', phrase: 'a three-quarter angle', icon: 'arrow-diagonal' },
+            { id: 'profile', name: 'Profile', description: 'A clean side view.', phrase: 'shot in profile', icon: 'circle-half' },
+            { id: 'high-angle', name: 'High Angle', description: 'Camera looking down on the subject.', phrase: 'a high angle, looking down on the subject', icon: 'arrow-down' },
+            { id: 'low-angle', name: 'Low Angle', description: 'Camera looking up at the subject.', phrase: 'a low angle, looking up at the subject', icon: 'arrow-up' },
+            { id: 'dutch-tilt', name: 'Dutch Tilt', description: 'A canted, off-kilter horizon.', phrase: 'a canted, dutch-tilt angle', icon: 'tilt' },
+          ],
+        },
+        {
+          kind: 'icon-options',
+          id: 'framing',
+          label: 'Framing',
+          options: [
+            { id: 'extreme-close-up', name: 'Extreme Close-Up', description: 'Just the eyes, or less.', phrase: 'an extreme close-up', icon: 'frame-1' },
+            { id: 'close-up', name: 'Close-Up', description: 'The face fills the frame.', phrase: 'a close-up', icon: 'frame-2' },
+            { id: 'medium-close-up', name: 'Medium Close-Up', description: 'Head and shoulders.', phrase: 'a medium close-up', icon: 'frame-3' },
+            { id: 'medium-shot', name: 'Medium Shot', description: 'Waist up.', phrase: 'a medium shot', icon: 'frame-4' },
+            { id: 'full-figure', name: 'Full Figure', description: 'The whole subject, head to foot.', phrase: 'the full figure in frame', icon: 'person' },
+            { id: 'wide-shot', name: 'Wide Shot', description: 'The subject small in a large scene.', phrase: 'a wide establishing shot', icon: 'frame-wide' },
           ],
         },
       ],
@@ -293,52 +364,61 @@ export const WORLD: World = {
       number: '07',
       title: 'Camera',
       subtitle: 'The gear behind the frame.',
-      kind: 'options',
       fields: [
         {
-          kind: 'options',
+          kind: 'icon-options',
           id: 'cameraBody',
           label: 'Camera Body',
           options: [
-            { id: 'leica-m6', name: 'Leica M6', description: 'Rangefinder classic, quiet shutter, 35mm framing.', phrase: 'shot on a Leica M6 rangefinder' },
-            { id: 'contax-t2', name: 'Contax T2', description: 'Pocketable, razor-sharp Zeiss glass.', phrase: 'shot on a Contax T2 point-and-shoot' },
-            { id: 'nikon-fm2', name: 'Nikon FM2', description: 'Fully mechanical SLR, built for the long haul.', phrase: 'shot on a Nikon FM2 SLR' },
-            { id: 'hasselblad-500c', name: 'Hasselblad 500C', description: 'Square medium format, waist-level and deliberate.', phrase: 'shot on a Hasselblad 500C medium format camera' },
-            { id: 'pentax-67', name: 'Pentax 67', description: 'Medium format with the handling of a 35mm SLR.', phrase: 'shot on a Pentax 67 medium format camera' },
+            { id: 'leica-m6', name: 'Leica M6', description: 'Rangefinder classic, quiet shutter, 35mm framing.', phrase: 'shot on a Leica M6 rangefinder', icon: 'camera-rangefinder' },
+            { id: 'contax-t2', name: 'Contax T2', description: 'Pocketable, razor-sharp Zeiss glass.', phrase: 'shot on a Contax T2 point-and-shoot', icon: 'camera-rangefinder' },
+            { id: 'nikon-fm2', name: 'Nikon FM2', description: 'Fully mechanical SLR, built for the long haul.', phrase: 'shot on a Nikon FM2 SLR', icon: 'camera-slr' },
+            { id: 'hasselblad-500c', name: 'Hasselblad 500C', description: 'Square medium format, waist-level and deliberate.', phrase: 'shot on a Hasselblad 500C medium format camera', icon: 'camera-mf' },
+            { id: 'pentax-67', name: 'Pentax 67', description: 'Medium format with the handling of a 35mm SLR.', phrase: 'shot on a Pentax 67 medium format camera', icon: 'camera-mf' },
           ],
         },
         {
-          kind: 'options',
+          kind: 'icon-options',
           id: 'depthOfField',
           label: 'Depth of Field',
           options: [
-            { id: 'wide-open-f1-4', name: 'Wide Open f/1.4', description: 'Razor-thin focus, the background dissolves.', phrase: 'shot wide open at f/1.4 with razor-thin depth of field' },
-            { id: 'shallow-f2-8', name: 'Shallow f/2.8', description: 'Subject sharp, background softly falling away.', phrase: 'shallow depth of field at f/2.8' },
-            { id: 'balanced-f5-6', name: 'Balanced f/5.6', description: 'Enough sharpness to hold the scene together.', phrase: 'balanced depth of field at f/5.6' },
-            { id: 'deep-focus-f11', name: 'Deep Focus f/11', description: 'Foreground to background, all of it sharp.', phrase: 'deep focus at f/11, sharp from foreground to background' },
+            { id: 'wide-open-f1-4', name: 'Wide Open f/1.4', description: 'Razor-thin focus, the background dissolves.', phrase: 'shot wide open at f/1.4 with razor-thin depth of field', icon: 'aperture-1' },
+            { id: 'shallow-f2-8', name: 'Shallow f/2.8', description: 'Subject sharp, background softly falling away.', phrase: 'shallow depth of field at f/2.8', icon: 'aperture-2' },
+            { id: 'balanced-f5-6', name: 'Balanced f/5.6', description: 'Enough sharpness to hold the scene together.', phrase: 'balanced depth of field at f/5.6', icon: 'aperture-3' },
+            { id: 'deep-focus-f11', name: 'Deep Focus f/11', description: 'Foreground to background, all of it sharp.', phrase: 'deep focus at f/11, sharp from foreground to background', icon: 'aperture-4' },
           ],
         },
         {
-          kind: 'options',
+          kind: 'icon-options',
           id: 'filmStock',
           label: 'Film Stock',
           options: [
-            { id: 'portra-400', name: 'Kodak Portra 400', description: 'Warm skin tones, gentle color.', phrase: 'on Kodak Portra 400 film stock' },
-            { id: 'tri-x-400', name: 'Kodak Tri-X 400 B&W', description: 'Punchy black and white with real grit.', phrase: 'on Kodak Tri-X 400 black and white film' },
-            { id: 'fuji-superia-400', name: 'Fuji Superia 400', description: 'Cool greens, everyday color.', phrase: 'on Fuji Superia 400 film stock' },
-            { id: 'cinestill-800t', name: 'Cinestill 800T', description: 'Tungsten-balanced, halated neon.', phrase: 'on Cinestill 800T film with characteristic halation' },
-            { id: 'ilford-hp5-plus', name: 'Ilford HP5 Plus', description: 'Classic monochrome workhorse.', phrase: 'on Ilford HP5 Plus black and white film' },
+            { id: 'portra-400', name: 'Kodak Portra 400', description: 'Warm skin tones, gentle color.', phrase: 'on Kodak Portra 400 film stock', icon: 'film-color' },
+            { id: 'tri-x-400', name: 'Kodak Tri-X 400 B&W', description: 'Punchy black and white with real grit.', phrase: 'on Kodak Tri-X 400 black and white film', icon: 'film-bw' },
+            { id: 'fuji-superia-400', name: 'Fuji Superia 400', description: 'Cool greens, everyday color.', phrase: 'on Fuji Superia 400 film stock', icon: 'film-color' },
+            { id: 'cinestill-800t', name: 'Cinestill 800T', description: 'Tungsten-balanced, halated neon.', phrase: 'on Cinestill 800T film with characteristic halation', icon: 'film-color' },
+            { id: 'ilford-hp5-plus', name: 'Ilford HP5 Plus', description: 'Classic monochrome workhorse.', phrase: 'on Ilford HP5 Plus black and white film', icon: 'film-bw' },
           ],
         },
         {
-          kind: 'options',
+          kind: 'slider',
           id: 'grain',
-          label: 'Grain',
+          label: 'Film Grain',
           options: [
             { id: 'clean', name: 'Clean', description: 'Minimal grain, smooth tonal range.', phrase: 'clean, minimal film grain' },
             { id: 'fine', name: 'Fine', description: 'Just enough texture to read as film.', phrase: 'fine film grain' },
             { id: 'pronounced', name: 'Pronounced', description: 'Visible grain structure throughout.', phrase: 'pronounced, visible film grain' },
             { id: 'heavy-push', name: 'Heavy Push', description: 'Pushed a stop or two, grain doing heavy lifting.', phrase: 'heavy, pushed-stock film grain' },
+          ],
+        },
+        {
+          kind: 'slider',
+          id: 'filmScan',
+          label: 'Film Scan',
+          options: [
+            { id: 'clean-digital', name: 'Clean Digital', description: 'No dust, no artifacts.', phrase: 'a clean digital scan with no artifacts' },
+            { id: 'balanced-scan', name: 'Balanced', description: 'Natural texture, nothing exaggerated.', phrase: 'a balanced scan preserving natural texture' },
+            { id: 'rough-analog', name: 'Rough Analog', description: 'Dust, scratches, the occasional light leak.', phrase: 'a rough analog scan with dust and light leaks' },
           ],
         },
       ],
@@ -348,12 +428,11 @@ export const WORLD: World = {
       number: '08',
       title: 'Time Machine',
       subtitle: 'Dress the era, if this frame lives somewhere other than now.',
-      kind: 'options',
       fields: [
         {
-          kind: 'options',
-          id: 'period',
-          label: 'Period',
+          kind: 'slider',
+          id: 'era',
+          label: 'Era',
           options: [
             { id: '1960s', name: '1960s', description: 'Mod cuts, optimism, clean lines.', phrase: 'set in the 1960s' },
             { id: '1970s', name: '1970s', description: 'Earth tones, long collars, analog warmth.', phrase: 'set in the 1970s' },

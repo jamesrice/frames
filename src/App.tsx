@@ -11,6 +11,9 @@ import { Accordion } from './components/Accordion'
 import { PresetGrid } from './components/PresetGrid'
 import { TextField } from './components/TextField'
 import { OptionCardGrid } from './components/OptionCardGrid'
+import { IconOptionGrid } from './components/IconOptionGrid'
+import { WheelSelector } from './components/WheelSelector'
+import { Slider } from './components/Slider'
 import { PromptRail } from './components/PromptRail'
 
 const CHAR_CAP = 1024
@@ -26,6 +29,7 @@ type Action =
   | { type: 'APPLY_PRESET'; preset: Preset }
   | { type: 'SET_TEXT'; fieldId: string; value: string }
   | { type: 'TOGGLE_OPTION'; fieldId: string; optionId: string }
+  | { type: 'SET_OPTION'; fieldId: string; optionId: string }
   | { type: 'TOGGLE_CAP_MODE' }
   | { type: 'ARCHIVE_PROMPT'; prompt: string }
   | { type: 'DELETE_ARCHIVED'; id: string }
@@ -34,7 +38,6 @@ type Action =
 function initialText(): Record<string, string> {
   const text: Record<string, string> = {}
   for (const section of WORLD.sections) {
-    if (section.kind !== 'text') continue
     for (const field of section.fields) {
       if (field.kind === 'text') text[field.id] = ''
     }
@@ -45,9 +48,8 @@ function initialText(): Record<string, string> {
 function initialSelections(): Record<string, string | null> {
   const selections: Record<string, string | null> = {}
   for (const section of WORLD.sections) {
-    if (section.kind !== 'options') continue
     for (const field of section.fields) {
-      if (field.kind === 'options') selections[field.id] = null
+      if (field.kind !== 'text') selections[field.id] = null
     }
   }
   return selections
@@ -95,6 +97,12 @@ function reducer(state: BuilderState, action: Action): BuilderState {
         selections: { ...state.selections, [action.fieldId]: next },
       }
     }
+    case 'SET_OPTION':
+      return {
+        ...state,
+        presetId: null,
+        selections: { ...state.selections, [action.fieldId]: action.optionId },
+      }
     case 'TOGGLE_CAP_MODE':
       return { ...state, capMode: !state.capMode }
     case 'ARCHIVE_PROMPT': {
@@ -178,35 +186,59 @@ export default function App() {
           <div className="mt-10 border-t border-ft-ink/10">
             {WORLD.sections.map((section) => (
               <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
-                {section.kind === 'presets' && (
+                {section.special === 'presets' && (
                   <PresetGrid
                     presets={WORLD.presets}
                     selectedPresetId={state.presetId}
                     onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
                   />
                 )}
-                {section.kind === 'text' &&
-                  section.fields.map((field) =>
-                    field.kind === 'text' ? (
+                {section.fields.map((field) => {
+                  if (field.kind === 'text') {
+                    return (
                       <TextField
                         key={field.id}
                         field={field}
                         value={state.text[field.id] ?? ''}
                         onChange={(value) => dispatch({ type: 'SET_TEXT', fieldId: field.id, value })}
                       />
-                    ) : null,
-                  )}
-                {section.kind === 'options' &&
-                  section.fields.map((field) =>
-                    field.kind === 'options' ? (
-                      <OptionCardGrid
+                    )
+                  }
+
+                  const selectedOptionId = state.selections[field.id] ?? null
+
+                  if (field.kind === 'slider') {
+                    return (
+                      <Slider
                         key={field.id}
                         field={field}
-                        selectedOptionId={state.selections[field.id] ?? null}
-                        onSelect={(optionId) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })}
+                        selectedOptionId={selectedOptionId}
+                        onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
                       />
-                    ) : null,
-                  )}
+                    )
+                  }
+
+                  const onSelect = (optionId: string) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })
+
+                  if (field.kind === 'wheel') {
+                    return (
+                      <WheelSelector
+                        key={field.id}
+                        options={field.options}
+                        selectedOptionId={selectedOptionId}
+                        onSelect={onSelect}
+                      />
+                    )
+                  }
+
+                  if (field.kind === 'icon-options') {
+                    return (
+                      <IconOptionGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+                    )
+                  }
+
+                  return <OptionCardGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+                })}
               </Accordion>
             ))}
           </div>

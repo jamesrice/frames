@@ -1,4 +1,5 @@
 import type { Preset } from '../data/world'
+import { Icon } from './Icon'
 
 interface PresetGridProps {
   presets: Preset[]
@@ -30,7 +31,12 @@ export function PresetGrid({ presets, selectedPresetId, onSelect }: PresetGridPr
                 : 'border-ft-ink/15 hover:border-ft-purple/60'
             }`}
           >
-            <div className={`h-24 w-full ${TILE_COLORS[preset.tileColor]}`} aria-hidden="true" />
+            <div
+              className={`flex h-24 w-full items-center justify-center text-white ${TILE_COLORS[preset.tileColor]}`}
+              aria-hidden="true"
+            >
+              <Icon name={preset.icon} className="h-8 w-8" />
+            </div>
             <div className="p-5">
               <h4 className="font-gilroy text-lg font-bold">{preset.name}</h4>
               <p className="mt-1 font-mono text-xs text-ft-ink/55">{preset.specString}</p>

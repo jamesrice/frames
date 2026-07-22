@@ -16,9 +16,8 @@ export function assemblePrompt({ text, selections }: AssembleInput): string {
   }
 
   for (const section of WORLD.sections) {
-    if (section.kind !== 'options') continue
     for (const field of section.fields) {
-      if (field.kind !== 'options') continue
+      if (field.kind === 'text') continue
       const optionId = selections[field.id]
       if (!optionId) continue
       const option = field.options.find((candidate) => candidate.id === optionId)
