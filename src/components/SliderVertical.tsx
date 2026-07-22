@@ -10,12 +10,12 @@ export function SliderVertical({ field, selectedOptionId, onSelect }: SliderVert
   const selected = field.options.find((option) => option.id === selectedOptionId)
 
   return (
-    <div className="py-4">
+    <div className="py-3">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-mono text-xs uppercase tracking-[0.15em] text-white/50">{field.label}</p>
-        <p className="font-mono text-xs text-ft-purple">{selected ? selected.name : 'Not set'}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/50">{field.label}</p>
+        <p className="font-mono text-[11px] text-ft-purple">{selected ? selected.name : 'Not set'}</p>
       </div>
-      <ul className="mt-4 border-l border-white/15">
+      <ul className="mt-3 border-l border-ft-ink/15">
         {field.options.map((option) => {
           const active = option.id === selectedOptionId
           return (
@@ -24,17 +24,17 @@ export function SliderVertical({ field, selectedOptionId, onSelect }: SliderVert
                 type="button"
                 onClick={() => onSelect(option.id)}
                 aria-pressed={active}
-                className="group flex w-full items-center gap-3 py-2.5 pl-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50"
+                className="group flex w-full items-center gap-3 py-1.5 pl-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50"
               >
                 <span
                   aria-hidden="true"
                   className={`absolute -left-[4.5px] size-2 rounded-full transition-colors duration-[250ms] ease-ft ${
-                    active ? 'bg-ft-purple' : 'bg-white/25 group-hover:bg-ft-purple/60'
+                    active ? 'bg-ft-purple' : 'bg-ft-ink/20 group-hover:bg-ft-purple/60'
                   }`}
                 />
                 <span
-                  className={`font-mono text-[11px] uppercase tracking-[0.06em] transition-colors duration-[250ms] ease-ft ${
-                    active ? 'font-bold text-ft-purple' : 'text-white/45 group-hover:text-white/70'
+                  className={`font-mono text-[10px] uppercase tracking-[0.06em] transition-colors duration-[250ms] ease-ft ${
+                    active ? 'font-bold text-ft-purple' : 'text-ft-ink/45 group-hover:text-ft-ink/70'
                   }`}
                 >
                   {option.name}
@@ -44,8 +44,8 @@ export function SliderVertical({ field, selectedOptionId, onSelect }: SliderVert
           )
         })}
       </ul>
-      <p className="mt-3 min-h-[2.5em] text-xs leading-snug text-white/35">
-        {selected ? selected.description : 'Slide to set — or leave unset to let the model decide.'}
+      <p className="mt-2 min-h-[2em] text-xs leading-snug text-ft-ink/40">
+        {selected ? selected.description : 'Pick a stop — or leave unset to let the model decide.'}
       </p>
     </div>
   )

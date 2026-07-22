@@ -19,8 +19,8 @@
 
 @layer base {
   body {
-    background-color: var(--color-ft-ink);
-    color: var(--color-ft-beige);
+    background-color: var(--color-ft-beige);
+    color: var(--color-ft-ink);
     font-family: var(--font-gilroy);
     -webkit-font-smoothing: antialiased;
   }

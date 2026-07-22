@@ -21,14 +21,16 @@ export function ApproachPicker({ approach, onSelect }: ApproachPickerProps) {
             type="button"
             onClick={() => onSelect(card.id)}
             aria-pressed={active}
-            className={`rounded-[6px] border px-5 py-4 text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+            className={`rounded-[6px] border px-4 py-3 text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-ink/40 ${
               active
                 ? 'border-ft-purple bg-ft-purple text-white'
-                : 'border-white/10 bg-white/5 text-white/60 hover:border-ft-purple/60'
+                : 'border-ft-ink/15 bg-white/40 text-ft-ink/70 hover:border-ft-purple/60'
             }`}
           >
-            <span className="block font-mono text-sm font-bold uppercase tracking-[0.12em]">{card.title}</span>
-            <span className={`mt-1 block text-sm ${active ? 'text-white/80' : 'text-white/40'}`}>{card.description}</span>
+            <span className="block font-mono text-xs font-bold uppercase tracking-[0.12em]">{card.title}</span>
+            <span className={`mt-0.5 block text-xs ${active ? 'text-white/80' : 'text-ft-ink/40'}`}>
+              {card.description}
+            </span>
           </button>
         )
       })}

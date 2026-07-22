@@ -2,16 +2,17 @@ import { useMemo } from 'react'
 import type { Option } from '../data/world'
 
 interface WheelSelectorProps {
+  fieldLabel: string
   options: Option[]
   selectedOptionId: string | null
   onSelect: (optionId: string) => void
 }
 
-const SIZE = 240
+const SIZE = 480
 const CENTER = SIZE / 2
-const OUTER_R = 112
-const INNER_R = 58
-const GAP_DEG = 3
+const OUTER_R = 234
+const INNER_R = 122
+const LABEL_R = (OUTER_R + INNER_R) / 2 + 8
 
 function polar(angleDeg: number, r: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180
@@ -33,41 +34,38 @@ function slicePath(startAngle: number, endAngle: number) {
   ].join(' ')
 }
 
-function wrapLabel(text: string): string[] {
-  if (text.length <= 11) return [text]
-  const words = text.split(' ')
-  const mid = Math.ceil(words.length / 2)
-  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')]
-}
-
-export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSelectorProps) {
+export function WheelSelector({ fieldLabel, options, selectedOptionId, onSelect }: WheelSelectorProps) {
   const slices = useMemo(() => {
     const step = 360 / options.length
-    return options.map((option, index) => ({
-      option,
-      path: slicePath(index * step + GAP_DEG / 2, (index + 1) * step - GAP_DEG / 2),
-    }))
+    return options.map((option, index) => {
+      const mid = index * step + step / 2
+      return {
+        option,
+        path: slicePath(index * step, (index + 1) * step),
+        label: polar(mid, LABEL_R),
+      }
+    })
   }, [options])
 
   const selected = options.find((option) => option.id === selectedOptionId)
-  const centerLines = selected ? wrapLabel(selected.name) : ['Undecided']
 
   return (
-    <div className="flex flex-col items-center gap-8 py-4 sm:flex-row sm:items-center sm:justify-center">
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width={SIZE} height={SIZE} className="shrink-0">
+    <div className="flex justify-center py-2">
+      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="h-auto w-full max-w-[400px]" role="group" aria-label={fieldLabel}>
         {slices.map(({ option, path }) => {
           const active = option.id === selectedOptionId
           return (
             <path
               key={option.id}
               d={path}
-              className={`cursor-pointer stroke-ft-ink outline-none transition-colors duration-[250ms] ease-ft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ft-purple ${
-                active ? 'fill-ft-purple' : 'fill-white/10 hover:fill-ft-purple/40'
+              className={`cursor-pointer stroke-ft-ink/15 outline-none transition-colors duration-[250ms] ease-ft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ft-purple ${
+                active ? 'fill-ft-ink/15' : 'fill-ft-ink/[0.04] hover:fill-ft-purple/15'
               }`}
-              strokeWidth={3}
+              strokeWidth={1}
               onClick={() => onSelect(option.id)}
               role="button"
               aria-pressed={active}
+              aria-label={option.name}
               tabIndex={0}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
@@ -78,42 +76,44 @@ export function WheelSelector({ options, selectedOptionId, onSelect }: WheelSele
             />
           )
         })}
-        <circle cx={CENTER} cy={CENTER} r={INNER_R - 5} className="fill-ft-purple" />
-        <text
-          x={CENTER}
-          y={CENTER}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          className="fill-white font-mono text-[10px] font-bold uppercase tracking-[0.08em]"
-        >
-          {centerLines.map((line, index) => (
-            <tspan key={line} x={CENTER} dy={index === 0 ? `${-(centerLines.length - 1) * 0.6}em` : '1.2em'}>
-              {line}
-            </tspan>
-          ))}
-        </text>
-      </svg>
-      <ul className="grid w-full grid-cols-2 gap-2 sm:max-w-xs">
-        {options.map((option) => {
+        {slices.map(({ option, label }) => {
           const active = option.id === selectedOptionId
           return (
-            <li key={option.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(option.id)}
-                aria-pressed={active}
-                className={`w-full rounded-full border px-3 py-2 text-left font-mono text-[11px] uppercase tracking-[0.06em] transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 ${
-                  active
-                    ? 'border-ft-purple bg-ft-purple text-white'
-                    : 'border-white/15 text-white/60 hover:border-ft-purple/60'
-                }`}
-              >
-                {option.name}
-              </button>
-            </li>
+            <text
+              key={`label-${option.id}`}
+              x={label.x}
+              y={label.y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className={`pointer-events-none select-none font-mono text-[17px] transition-colors duration-[250ms] ease-ft ${
+                active ? 'fill-ft-purple' : 'fill-ft-ink/45'
+              }`}
+            >
+              {option.name}
+            </text>
           )
         })}
-      </ul>
+        <circle cx={CENTER} cy={CENTER} r={INNER_R - 4} className="fill-ft-purple" />
+        <text
+          x={CENTER}
+          y={CENTER - 8}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-white font-gilroy text-[30px] font-bold"
+        >
+          {selected ? selected.name : 'Undecided'}
+        </text>
+        <text
+          x={CENTER}
+          y={CENTER + 26}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-white/70 font-mono text-[13px] uppercase"
+          style={{ letterSpacing: '0.2em' }}
+        >
+          {fieldLabel}
+        </text>
+      </svg>
     </div>
   )
 }

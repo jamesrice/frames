@@ -7,10 +7,15 @@ interface OptionCardGridProps {
 }
 
 export function OptionCardGrid({ field, selectedOptionId, onSelect }: OptionCardGridProps) {
+  const selected = field.options.find((option) => option.id === selectedOptionId)
+
   return (
-    <div className="py-4 first:pt-0">
-      <p className="font-mono text-xs uppercase tracking-[0.15em] text-white/50">{field.label}</p>
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="py-3 first:pt-0">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/50">{field.label}</p>
+        <p className="truncate font-mono text-[11px] text-ft-purple">{selected ? selected.name : ''}</p>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {field.options.map((option) => {
           const active = option.id === selectedOptionId
           return (
@@ -19,24 +24,21 @@ export function OptionCardGrid({ field, selectedOptionId, onSelect }: OptionCard
               type="button"
               onClick={() => onSelect(option.id)}
               aria-pressed={active}
-              className={`rounded-[6px] border p-4 text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60 ${
+              title={option.description}
+              className={`rounded-[6px] border px-2.5 py-2 text-left transition-colors duration-[250ms] ease-ft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 ${
                 active
-                  ? 'border-ft-purple bg-ft-purple/10'
-                  : 'border-white/10 bg-white/[0.03] hover:border-ft-purple/60'
+                  ? 'border-ft-purple bg-ft-purple/5 text-ft-purple'
+                  : 'border-ft-ink/15 bg-white/40 hover:border-ft-purple/50'
               }`}
             >
-              <span
-                className={`block font-mono text-[11px] font-bold uppercase tracking-[0.08em] ${
-                  active ? 'text-ft-purple' : ''
-                }`}
-              >
+              <span className="block truncate font-mono text-[10px] uppercase leading-tight tracking-[0.04em]">
                 {option.name}
               </span>
-              <span className="mt-1 block text-xs leading-snug text-white/40">{option.description}</span>
             </button>
           )
         })}
       </div>
+      {selected && <p className="mt-2 text-xs text-ft-ink/45">{selected.description}</p>}
     </div>
   )
 }

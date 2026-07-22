@@ -42,8 +42,7 @@ type Action =
   | { type: 'SET_APPROACH'; approach: Approach }
   | { type: 'APPLY_PRESET'; preset: Preset }
   | { type: 'SET_TEXT'; fieldId: string; value: string }
-  | { type: 'TOGGLE_OPTION'; fieldId: string; optionId: string }
-  | { type: 'SET_OPTION'; fieldId: string; optionId: string }
+  | { type: 'SET_SELECTION'; fieldId: string; optionId: string | null }
   | { type: 'TOGGLE_CAP_MODE' }
   | { type: 'COMPOSE'; composed: string }
   | { type: 'CLEAR_COMPOSED' }
@@ -106,17 +105,7 @@ function reducer(state: BuilderState, action: Action): BuilderState {
       }
     case 'SET_TEXT':
       return { ...state, text: { ...state.text, [action.fieldId]: action.value }, composed: null }
-    case 'TOGGLE_OPTION': {
-      const current = state.selections[action.fieldId]
-      const next = current === action.optionId ? null : action.optionId
-      return {
-        ...state,
-        presetId: null,
-        selections: { ...state.selections, [action.fieldId]: next },
-        composed: null,
-      }
-    }
-    case 'SET_OPTION':
+    case 'SET_SELECTION':
       return {
         ...state,
         presetId: null,
@@ -154,6 +143,7 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const [showIntro, setShowIntro] = useState(() => !loadIntroSeen())
   const [composeCount, setComposeCount] = useState(() => loadComposeCount())
+  const [openSectionId, setOpenSectionId] = useState<string | null>(WORLD.sections[0]?.id ?? null)
 
   useEffect(() => {
     dispatch({ type: 'HYDRATE', draft: loadDraft(), archive: loadArchive() })
@@ -202,6 +192,25 @@ export default function App() {
     [],
   )
 
+  const advanceFrom = (sectionId: string) => {
+    const index = WORLD.sections.findIndex((section) => section.id === sectionId)
+    const next = WORLD.sections[index + 1]
+    setOpenSectionId(next ? next.id : null)
+  }
+
+  // Selecting a value closes the section and opens the next one — but only
+  // once every select-field in the section has a value, so multi-field
+  // sections (Camera, Time Machine) don't advance out from under the user.
+  const selectInSection = (section: Section, fieldId: string, optionId: string | null) => {
+    dispatch({ type: 'SET_SELECTION', fieldId, optionId })
+    if (!optionId) return
+    const nextSelections = { ...state.selections, [fieldId]: optionId }
+    const complete = section.fields
+      .filter((field) => field.kind !== 'text')
+      .every((field) => nextSelections[field.id])
+    if (complete) advanceFrom(section.id)
+  }
+
   const handleCompose = () => {
     const composed = composePrompt({ text: state.text, selections: state.selections })
     if (!composed) return
@@ -214,6 +223,7 @@ export default function App() {
   const handleReset = () => {
     dispatch({ type: 'RESET' })
     clearDraft()
+    setOpenSectionId(WORLD.sections[0]?.id ?? null)
   }
 
   const handleCopy = async (text: string) => {
@@ -231,7 +241,7 @@ export default function App() {
     setShowIntro(false)
   }
 
-  const renderSelectField = (field: Field) => {
+  const renderField = (section: Section, field: Field) => {
     if (field.kind === 'text') {
       return (
         <TextField
@@ -244,81 +254,94 @@ export default function App() {
     }
 
     const selectedOptionId = state.selections[field.id] ?? null
+    const setSelection = (optionId: string) => selectInSection(section, field.id, optionId)
+    const toggleSelection = (optionId: string) =>
+      selectInSection(section, field.id, selectedOptionId === optionId ? null : optionId)
 
     if (field.kind === 'slider') {
-      return (
-        <Slider
-          key={field.id}
-          field={field}
-          selectedOptionId={selectedOptionId}
-          onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
-        />
-      )
+      return <Slider key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={setSelection} />
     }
-
-    const onSelect = (optionId: string) => dispatch({ type: 'TOGGLE_OPTION', fieldId: field.id, optionId })
 
     if (field.kind === 'wheel') {
       return (
-        <WheelSelector key={field.id} options={field.options} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+        <div key={field.id} className="lg:col-span-2">
+          <WheelSelector
+            fieldLabel={field.label}
+            options={field.options}
+            selectedOptionId={selectedOptionId}
+            onSelect={toggleSelection}
+          />
+        </div>
       )
     }
 
     if (field.kind === 'icon-options') {
-      return <IconOptionGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+      return (
+        <IconOptionGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={toggleSelection} />
+      )
     }
 
-    return <OptionCardGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={onSelect} />
+    return <OptionCardGrid key={field.id} field={field} selectedOptionId={selectedOptionId} onSelect={toggleSelection} />
   }
 
   const renderSectionFields = (section: Section) => {
     const paired = section.fields.filter((field) => VERTICAL_SLIDER_PAIR.includes(field.id))
-    if (paired.length < 2) return section.fields.map(renderSelectField)
-
     const rest = section.fields.filter((field) => !VERTICAL_SLIDER_PAIR.includes(field.id))
     return (
-      <>
-        {rest.map(renderSelectField)}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {paired.map((field) =>
-            field.kind !== 'text' ? (
-              <SliderVertical
-                key={field.id}
-                field={field}
-                selectedOptionId={state.selections[field.id] ?? null}
-                onSelect={(optionId) => dispatch({ type: 'SET_OPTION', fieldId: field.id, optionId })}
-              />
-            ) : null,
-          )}
-        </div>
-      </>
+      <div className="grid grid-cols-1 gap-x-8 lg:grid-cols-2">
+        {rest.map((field) => renderField(section, field))}
+        {paired.length === 2 && (
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:col-span-2">
+            {paired.map((field) =>
+              field.kind !== 'text' ? (
+                <SliderVertical
+                  key={field.id}
+                  field={field}
+                  selectedOptionId={state.selections[field.id] ?? null}
+                  onSelect={(optionId) => selectInSection(section, field.id, optionId)}
+                />
+              ) : null,
+            )}
+          </div>
+        )}
+      </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-ft-ink text-ft-beige">
+    <div className="min-h-screen bg-ft-beige text-ft-ink">
       {showIntro && <IntroModal onClose={closeIntro} />}
-      <div className="lg:grid lg:grid-cols-[1fr_440px]">
+      <div className="lg:grid lg:grid-cols-[1fr_420px]">
         <div className="min-w-0">
           <Header composeCount={composeCount} onReset={handleReset} onShowIntro={() => setShowIntro(true)} />
           <main className="px-6 pb-24 lg:px-10">
-            <section className="border-t border-white/10 pt-6">
-              <h2 className="font-gilroy text-2xl font-bold uppercase tracking-[0.08em]">The Approach</h2>
-              <div className="mt-5">
+            <section className="border-t border-ft-ink/10 pt-5">
+              <h2 className="font-gilroy text-lg font-bold uppercase tracking-[0.08em]">The Approach</h2>
+              <div className="mt-3">
                 <ApproachPicker
                   approach={state.approach}
                   onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
                 />
               </div>
             </section>
-            <div className="mt-8 border-t border-white/10">
+            <div className="mt-6 border-t border-ft-ink/10">
               {WORLD.sections.map((section) => (
-                <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
+                <Accordion
+                  key={section.id}
+                  number={section.number}
+                  title={section.title}
+                  subtitle={section.subtitle}
+                  open={openSectionId === section.id}
+                  onToggle={() => setOpenSectionId(openSectionId === section.id ? null : section.id)}
+                >
                   {section.special === 'presets' && (
                     <PresetGrid
                       presets={WORLD.presets}
                       selectedPresetId={state.presetId}
-                      onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
+                      onSelect={(preset) => {
+                        dispatch({ type: 'APPLY_PRESET', preset })
+                        advanceFrom(section.id)
+                      }}
                     />
                   )}
                   {renderSectionFields(section)}

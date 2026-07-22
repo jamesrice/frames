@@ -32,17 +32,17 @@ export function IntroModal({ onClose }: IntroModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ft-ink/60 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="intro-title"
     >
-      <div className="relative w-full max-w-md rounded-[12px] border border-white/10 bg-ft-panel p-8">
+      <div className="relative w-full max-w-md rounded-[12px] border border-ft-ink/10 bg-ft-beige p-8 shadow-[0_20px_60px_rgba(19,19,19,0.35)]">
         <button
           type="button"
           onClick={() => onClose(dontShow)}
           aria-label="Close"
-          className="absolute right-4 top-4 font-mono text-sm text-white/40 transition-colors duration-[250ms] ease-ft hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60"
+          className="absolute right-4 top-4 font-mono text-sm text-ft-ink/40 transition-colors duration-[250ms] ease-ft hover:text-ft-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60"
         >
           ×
         </button>
@@ -52,32 +52,32 @@ export function IntroModal({ onClose }: IntroModalProps) {
           Compose your prompt
         </h2>
 
-        <ol className="mt-6 space-y-5">
+        <ol className="mt-6 space-y-4">
           {STEPS.map((step) => (
             <li key={step.number}>
-              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/50">
+              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/50">
                 <span className="mr-2 text-ft-purple">{step.number}</span>
                 {step.title}
               </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-white/70">{step.body}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ft-ink/70">{step.body}</p>
             </li>
           ))}
         </ol>
 
-        <div className="mt-8 flex items-center justify-between gap-4">
-          <label className="flex cursor-pointer items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-white/50">
+        <div className="mt-7 flex items-center justify-between gap-4">
+          <label className="flex cursor-pointer items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ft-ink/50">
             <input
               type="checkbox"
               checked={dontShow}
               onChange={(event) => setDontShow(event.target.checked)}
-              className="size-4 cursor-pointer appearance-none rounded-[3px] border border-white/30 accent-ft-purple checked:appearance-auto"
+              className="size-4 cursor-pointer appearance-none rounded-[3px] border border-ft-ink/30 accent-ft-purple checked:appearance-auto"
             />
             Don't show again
           </label>
           <button
             type="button"
             onClick={() => onClose(dontShow)}
-            className="rounded-[6px] bg-ft-purple px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-white transition-colors duration-[250ms] ease-ft hover:bg-ft-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="rounded-[6px] bg-ft-purple px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] text-white transition-colors duration-[250ms] ease-ft hover:bg-ft-purple/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-ink/60"
           >
             Start composing
           </button>

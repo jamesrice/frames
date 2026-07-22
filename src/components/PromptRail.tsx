@@ -49,7 +49,7 @@ export function PromptRail({
   const overLimit = capMode && composed !== null && composed.length > charCap
 
   return (
-    <aside className="flex flex-col border-t border-white/10 bg-ft-panel lg:sticky lg:top-0 lg:h-screen lg:border-l lg:border-t-0">
+    <aside className="flex flex-col border-t border-ft-ink/10 bg-ft-ink text-ft-beige lg:sticky lg:top-0 lg:h-screen lg:border-l lg:border-t-0">
       <div className="flex shrink-0">
         {(['draft', 'archive'] as const).map((value) => (
           <button
