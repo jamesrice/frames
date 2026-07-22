@@ -9,6 +9,7 @@ import { Hero } from './components/Hero'
 import { ApproachPicker } from './components/ApproachPicker'
 import { Accordion } from './components/Accordion'
 import { PresetGrid } from './components/PresetGrid'
+import { TextField } from './components/TextField'
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -163,6 +164,17 @@ export default function App() {
                     onSelect={(preset) => dispatch({ type: 'APPLY_PRESET', preset })}
                   />
                 )}
+                {section.kind === 'text' &&
+                  section.fields.map((field) =>
+                    field.kind === 'text' ? (
+                      <TextField
+                        key={field.id}
+                        field={field}
+                        value={state.text[field.id] ?? ''}
+                        onChange={(value) => dispatch({ type: 'SET_TEXT', fieldId: field.id, value })}
+                      />
+                    ) : null,
+                  )}
               </Accordion>
             ))}
           </div>
