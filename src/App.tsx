@@ -7,6 +7,7 @@ import type { Preset } from './data/world'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { ApproachPicker } from './components/ApproachPicker'
+import { Accordion } from './components/Accordion'
 
 interface BuilderState extends DraftPayload {
   archive: ArchivedPrompt[]
@@ -151,6 +152,13 @@ export default function App() {
             approach={state.approach}
             onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
           />
+          <div className="mt-10 border-t border-ft-ink/10">
+            {WORLD.sections.map((section) => (
+              <Accordion key={section.id} number={section.number} title={section.title} subtitle={section.subtitle}>
+                <p className="text-sm text-ft-ink/40">Section content coming in the next task.</p>
+              </Accordion>
+            ))}
+          </div>
         </div>
         <aside className="h-fit rounded-[20px] bg-ft-ink p-6 text-white lg:sticky lg:top-8">
           <p className="text-white/50">{prompt || 'Nothing conjured yet.'}</p>
