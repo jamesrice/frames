@@ -86,7 +86,7 @@ export function WheelSelector({ fieldLabel, options, selectedOptionId, onSelect 
               textAnchor="middle"
               dominantBaseline="middle"
               className={`pointer-events-none select-none font-mono text-[17px] transition-colors duration-[250ms] ease-ft ${
-                active ? 'fill-ft-purple' : 'fill-ft-ink/45'
+                active ? 'fill-ft-purple' : 'fill-ft-ink/70'
               }`}
             >
               {option.name}

@@ -497,10 +497,11 @@ export const WORLD: World = {
           options: [
             { id: '1960s', name: '1960s', description: 'Mod cuts, optimism, clean lines.', phrase: 'set in the 1960s' },
             { id: '1970s', name: '1970s', description: 'Earth tones, long collars, analog warmth.', phrase: 'set in the 1970s' },
-            { id: '1980s', name: '1980s', description: 'Bold color, big shapes, neon ambition.', phrase: 'set in the 1980s' },
+            { id: '1980s', name: '1980s', description: 'GenX never dies. Bold color, big shapes, neon ambition. Killer, dude.', phrase: 'set in the 1980s' },
             { id: '1990s', name: '1990s', description: 'Grunge, minimalism, the last analog decade.', phrase: 'set in the 1990s' },
-            { id: 'y2k', name: 'Turn of the Millennium', description: 'Y2K optimism, chrome and gel pens.', phrase: 'set at the turn of the millennium' },
+            { id: 'y2k', name: 'Millennium', description: 'Y2K optimism, chrome and gel pens.', phrase: 'set at the turn of the millennium' },
             { id: 'present-day', name: 'Present Day', description: 'Now, exactly as it is.', phrase: 'set in the present day' },
+            { id: 'tomorrow', name: 'Tomorrow', description: 'Near-future, but still shot on film.', phrase: 'set in a near-future tomorrow, still shot on film' },
           ],
         },
         {

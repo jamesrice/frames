@@ -42,7 +42,7 @@ export function IntroModal({ onClose }: IntroModalProps) {
           type="button"
           onClick={() => onClose(dontShow)}
           aria-label="Close"
-          className="absolute right-4 top-4 font-mono text-sm text-ft-ink/40 transition-colors duration-[250ms] ease-ft hover:text-ft-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60"
+          className="absolute right-4 top-4 font-mono text-sm text-ft-ink/65 transition-colors duration-[250ms] ease-ft hover:text-ft-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/60"
         >
           ×
         </button>
@@ -55,17 +55,17 @@ export function IntroModal({ onClose }: IntroModalProps) {
         <ol className="mt-6 space-y-4">
           {STEPS.map((step) => (
             <li key={step.number}>
-              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/50">
+              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/72">
                 <span className="mr-2 text-ft-purple">{step.number}</span>
                 {step.title}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-ft-ink/70">{step.body}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ft-ink/85">{step.body}</p>
             </li>
           ))}
         </ol>
 
         <div className="mt-7 flex items-center justify-between gap-4">
-          <label className="flex cursor-pointer items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ft-ink/50">
+          <label className="flex cursor-pointer items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ft-ink/72">
             <input
               type="checkbox"
               checked={dontShow}

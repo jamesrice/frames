@@ -18,8 +18,8 @@ import type { Approach, ArchivedPrompt, DraftPayload } from './lib/storage'
 import type { Field, Preset, Section } from './data/world'
 import { Header } from './components/Header'
 import { IntroModal } from './components/IntroModal'
-import { ApproachPicker } from './components/ApproachPicker'
 import { Accordion } from './components/Accordion'
+import { Footer } from './components/Footer'
 import { PresetGrid } from './components/PresetGrid'
 import { TextField } from './components/TextField'
 import { OptionCardGrid } from './components/OptionCardGrid'
@@ -398,17 +398,8 @@ export default function App() {
       <div className="lg:grid lg:grid-cols-[1fr_420px]">
         <div className="min-w-0">
           <Header composeCount={composeCount} onReset={handleReset} onShowIntro={() => setShowIntro(true)} />
-          <main className="px-6 pb-24 lg:px-10">
-            <section className="border-t border-ft-ink/10 pt-5">
-              <h2 className="font-gilroy text-lg font-bold uppercase tracking-[0.08em]">The Approach</h2>
-              <div className="mt-3">
-                <ApproachPicker
-                  approach={state.approach}
-                  onSelect={(approach) => dispatch({ type: 'SET_APPROACH', approach })}
-                />
-              </div>
-            </section>
-            <div className="mt-6 border-t border-ft-ink/10">
+          <main className="px-6 pb-16 lg:px-10">
+            <div className="border-t border-ft-ink/10">
               {WORLD.sections.map((section) => (
                 <Accordion
                   key={section.id}
@@ -439,7 +430,7 @@ export default function App() {
                       >
                         {sceneStatus === 'loading' ? 'Dreaming up a scene…' : '✦ New scene idea'}
                       </button>
-                      <span className="font-mono text-[10px] text-ft-ink/40">
+                      <span className="font-mono text-[10px] text-ft-ink/65">
                         {sceneStatus === 'error'
                           ? 'Idea engine unreachable — is the Gemini key configured? You can still write your own.'
                           : 'Uses your Section 01 look — a fresh idea every time.'}
@@ -451,6 +442,7 @@ export default function App() {
               ))}
             </div>
           </main>
+          <Footer />
         </div>
         <PromptRail
           tokens={tokens}

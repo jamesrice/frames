@@ -43,7 +43,7 @@ export function PresetGrid({ presets, selectedPresetId, onSelect }: PresetGridPr
               >
                 {preset.name}
               </span>
-              <span className="mt-0.5 block truncate font-mono text-[10px] text-ft-ink/40">{preset.specString}</span>
+              <span className="mt-0.5 block truncate font-mono text-[10px] text-ft-ink/65">{preset.specString}</span>
             </span>
           </button>
         )

@@ -24,10 +24,10 @@ export function Accordion({ number, title, subtitle, open, onToggle, children }:
         <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-mono text-xs text-ft-purple">{number}</span>
           <span className="font-gilroy text-lg font-bold uppercase tracking-[0.08em]">{title}</span>
-          <span className="text-xs text-ft-ink/40">{subtitle}</span>
+          <span className="text-xs text-ft-ink/65">{subtitle}</span>
         </span>
         <span
-          className={`shrink-0 font-mono text-lg text-ft-ink/40 transition-transform duration-[250ms] ease-ft ${
+          className={`shrink-0 font-mono text-lg text-ft-ink/65 transition-transform duration-[250ms] ease-ft ${
             open ? 'rotate-45' : ''
           }`}
           aria-hidden="true"

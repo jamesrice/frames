@@ -12,7 +12,7 @@ export function OptionCardGrid({ field, selectedOptionId, onSelect }: OptionCard
   return (
     <div className="py-3 first:pt-0">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/50">{field.label}</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-ink/72">{field.label}</p>
         <p className="truncate font-mono text-[11px] text-ft-purple">{selected ? selected.name : ''}</p>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -38,7 +38,7 @@ export function OptionCardGrid({ field, selectedOptionId, onSelect }: OptionCard
           )
         })}
       </div>
-      {selected && <p className="mt-2 text-xs text-ft-ink/45">{selected.description}</p>}
+      {selected && <p className="mt-2 text-xs text-ft-ink/70">{selected.description}</p>}
     </div>
   )
 }
