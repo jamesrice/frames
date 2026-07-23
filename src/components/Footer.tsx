@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="mt-4 flex justify-center border-t border-ft-ink/10 px-6 py-8 lg:px-10">
+    <footer className="mt-4 flex items-center justify-between gap-4 border-t border-ft-ink/10 px-6 py-8 lg:px-10">
       <a
         href="https://fictiontribe.com"
         target="_blank"
@@ -38,6 +38,9 @@ export function Footer() {
           </defs>
         </svg>
       </a>
+      <span className="select-none font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-ft-ink/55">
+        Running on Gemini 2.5
+      </span>
     </footer>
   )
 }
