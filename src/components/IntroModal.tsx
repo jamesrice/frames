@@ -8,7 +8,7 @@ const STEPS: { number: string; title: string; body: string }[] = [
   {
     number: '01',
     title: 'Choose your approach',
-    body: 'Pre-Lit drops you into a curated look you can adjust from there. Manual Setup starts empty — every control is yours to dial.',
+    body: 'Presets drop you into a curated look you can adjust from there. Skip and start empty at step 2 — every control is yours to dial.',
   },
   {
     number: '02',
