@@ -143,7 +143,9 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const [showIntro, setShowIntro] = useState(() => !loadIntroSeen())
   const [composeCount, setComposeCount] = useState(() => loadComposeCount())
-  const [openSectionId, setOpenSectionId] = useState<string | null>(WORLD.sections[0]?.id ?? null)
+  const [openSectionIds, setOpenSectionIds] = useState<string[]>(() =>
+    WORLD.sections[0] ? [WORLD.sections[0].id] : [],
+  )
 
   useEffect(() => {
     dispatch({ type: 'HYDRATE', draft: loadDraft(), archive: loadArchive() })
@@ -192,23 +194,33 @@ export default function App() {
     [],
   )
 
+  // Sliding two-section window: a selection keeps its own section open and
+  // opens the next one; once a third section enters the window, the section
+  // two steps back closes.
   const advanceFrom = (sectionId: string) => {
-    const index = WORLD.sections.findIndex((section) => section.id === sectionId)
-    const next = WORLD.sections[index + 1]
-    setOpenSectionId(next ? next.id : null)
+    setOpenSectionIds((prev) => {
+      const index = WORLD.sections.findIndex((section) => section.id === sectionId)
+      const next = WORLD.sections[index + 1]
+      const queue = prev.includes(sectionId) ? [...prev] : [...prev, sectionId]
+      if (next && !queue.includes(next.id)) queue.push(next.id)
+      while (queue.length > 2) queue.shift()
+      return queue
+    })
   }
 
-  // Selecting a value closes the section and opens the next one — but only
-  // once every select-field in the section has a value, so multi-field
-  // sections (Camera, Time Machine) don't advance out from under the user.
+  const toggleSection = (sectionId: string) => {
+    setOpenSectionIds((prev) => {
+      if (prev.includes(sectionId)) return prev.filter((id) => id !== sectionId)
+      const queue = [...prev, sectionId]
+      while (queue.length > 2) queue.shift()
+      return queue
+    })
+  }
+
   const selectInSection = (section: Section, fieldId: string, optionId: string | null) => {
     dispatch({ type: 'SET_SELECTION', fieldId, optionId })
     if (!optionId) return
-    const nextSelections = { ...state.selections, [fieldId]: optionId }
-    const complete = section.fields
-      .filter((field) => field.kind !== 'text')
-      .every((field) => nextSelections[field.id])
-    if (complete) advanceFrom(section.id)
+    advanceFrom(section.id)
   }
 
   const handleCompose = () => {
@@ -223,7 +235,7 @@ export default function App() {
   const handleReset = () => {
     dispatch({ type: 'RESET' })
     clearDraft()
-    setOpenSectionId(WORLD.sections[0]?.id ?? null)
+    setOpenSectionIds(WORLD.sections[0] ? [WORLD.sections[0].id] : [])
   }
 
   const handleCopy = async (text: string) => {
@@ -331,8 +343,8 @@ export default function App() {
                   number={section.number}
                   title={section.title}
                   subtitle={section.subtitle}
-                  open={openSectionId === section.id}
-                  onToggle={() => setOpenSectionId(openSectionId === section.id ? null : section.id)}
+                  open={openSectionIds.includes(section.id)}
+                  onToggle={() => toggleSection(section.id)}
                 >
                   {section.special === 'presets' && (
                     <PresetGrid
