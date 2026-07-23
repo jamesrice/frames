@@ -132,6 +132,8 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
         topP: 0.95,
         responseMimeType: 'application/json',
         responseSchema: SCENE_SCHEMA,
+        maxOutputTokens: 2048,
+        thinkingConfig: { thinkingBudget: 0 },
       })
       if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
       const parsed = JSON.parse(text) as Record<string, unknown>
@@ -150,7 +152,8 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
     if (body.mode === 'compose') {
       const { text, status } = await callGemini(key, composePrompt(body), {
         temperature: 0.9,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
+        thinkingConfig: { thinkingBudget: 0 },
       })
       if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
       return jsonResponse({ prompt: text.trim() })
