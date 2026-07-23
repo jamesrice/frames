@@ -14,8 +14,7 @@ export function ConsentBanner({ onAccept, onDecline }: ConsentBannerProps) {
       >
         <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ft-purple">Cookies</p>
         <p className="mt-2 text-sm leading-relaxed text-ft-ink/80">
-          We use analytics cookies (Google Analytics, LinkedIn, Snitcher) to understand traffic. Nothing loads until you
-          choose.
+          We use analytics cookies to understand traffic. Nothing loads until you choose.
         </p>
         <div className="mt-4 flex gap-2.5">
           <button
