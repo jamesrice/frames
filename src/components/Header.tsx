@@ -10,7 +10,7 @@ export function Header({ composeCount, onReset, onShowIntro }: HeaderProps) {
       <div className="min-w-0">
         <h1 className="font-gilroy text-3xl font-bold uppercase leading-none tracking-tight lg:text-4xl">Imagologies</h1>
         <p className="mt-1.5 max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.15em] text-ft-ink/85">
-          Learning how to prompt for photography. Trying to tune to Nano Banana for MidJourney aesthetic.
+          Explore prompting for photography. Built as example of custom, brand controlled image generation.
         </p>
       </div>
       <div className="flex items-start gap-6">
