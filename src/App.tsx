@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
 import { WORLD } from './data/world'
 import { composePrompt } from './lib/compose'
+import { generateRichPrompt, generateSceneIdea } from './lib/ai'
+import type { SceneIdea } from './lib/ai'
 import {
   clearDraft,
   loadArchive,
@@ -42,6 +44,7 @@ type Action =
   | { type: 'SET_APPROACH'; approach: Approach }
   | { type: 'APPLY_PRESET'; preset: Preset }
   | { type: 'SET_TEXT'; fieldId: string; value: string }
+  | { type: 'SET_SCENE'; scene: SceneIdea }
   | { type: 'SET_SELECTION'; fieldId: string; optionId: string | null }
   | { type: 'TOGGLE_CAP_MODE' }
   | { type: 'COMPOSE'; composed: string }
@@ -105,6 +108,8 @@ function reducer(state: BuilderState, action: Action): BuilderState {
       }
     case 'SET_TEXT':
       return { ...state, text: { ...state.text, [action.fieldId]: action.value }, composed: null }
+    case 'SET_SCENE':
+      return { ...state, text: { ...state.text, ...action.scene }, composed: null }
     case 'SET_SELECTION':
       return {
         ...state,
@@ -143,6 +148,8 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const [showIntro, setShowIntro] = useState(() => !loadIntroSeen())
   const [composeCount, setComposeCount] = useState(() => loadComposeCount())
+  const [sceneStatus, setSceneStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [composing, setComposing] = useState(false)
   const [openSectionIds, setOpenSectionIds] = useState<string[]>(() =>
     WORLD.sections[0] ? [WORLD.sections[0].id] : [],
   )
@@ -223,8 +230,73 @@ export default function App() {
     advanceFrom(section.id)
   }
 
-  const handleCompose = () => {
-    const composed = composePrompt({ text: state.text, selections: state.selections })
+  const selectedOptionsByField = useMemo(() => {
+    const map = new Map<string, { label: string; name: string; phrase: string }>()
+    for (const section of WORLD.sections) {
+      for (const field of section.fields) {
+        if (field.kind === 'text') continue
+        const optionId = state.selections[field.id]
+        if (!optionId) continue
+        const option = field.options.find((candidate) => candidate.id === optionId)
+        if (option) map.set(field.id, { label: field.label, name: option.name, phrase: option.phrase })
+      }
+    }
+    return map
+  }, [state.selections])
+
+  const handleGenerateScene = async (presetOverride?: Preset) => {
+    if (sceneStatus === 'loading') return
+    setSceneStatus('loading')
+    const preset = presetOverride ?? WORLD.presets.find((candidate) => candidate.id === state.presetId) ?? null
+    const moodCues = ['humanMoment', 'style', 'light', 'timeOfDay']
+      .map((fieldId) => {
+        if (presetOverride) {
+          const optionId = presetOverride.selections[fieldId]
+          for (const section of WORLD.sections) {
+            for (const field of section.fields) {
+              if (field.kind !== 'text' && field.id === fieldId) {
+                return field.options.find((option) => option.id === optionId)?.name
+              }
+            }
+          }
+          return undefined
+        }
+        return selectedOptionsByField.get(fieldId)?.name
+      })
+      .filter((name): name is string => Boolean(name))
+    const idea = await generateSceneIdea({
+      presetName: preset?.name ?? null,
+      specString: preset?.specString ?? null,
+      moodCues,
+    })
+    if (idea) {
+      dispatch({ type: 'SET_SCENE', scene: idea })
+      setSceneStatus('idle')
+    } else {
+      setSceneStatus('error')
+    }
+  }
+
+  const handleCompose = async () => {
+    if (composing) return
+    const decisions: string[] = []
+    for (const section of WORLD.sections) {
+      for (const field of section.fields) {
+        if (field.kind === 'text') continue
+        const selected = selectedOptionsByField.get(field.id)
+        if (selected) decisions.push(`${selected.label}: ${selected.name} — ${selected.phrase}`)
+      }
+    }
+    const scene: Record<string, string> = {}
+    for (const [fieldId, value] of Object.entries(state.text)) {
+      if (value.trim()) scene[fieldId] = value.trim()
+    }
+    if (decisions.length === 0 && Object.keys(scene).length === 0) return
+
+    setComposing(true)
+    const rich = await generateRichPrompt({ decisions, scene, capMode: state.capMode })
+    const composed = rich ?? composePrompt({ text: state.text, selections: state.selections })
+    setComposing(false)
     if (!composed) return
     dispatch({ type: 'COMPOSE', composed })
     const next = composeCount + 1
@@ -353,8 +425,26 @@ export default function App() {
                       onSelect={(preset) => {
                         dispatch({ type: 'APPLY_PRESET', preset })
                         advanceFrom(section.id)
+                        void handleGenerateScene(preset)
                       }}
                     />
+                  )}
+                  {section.id === 'scene' && (
+                    <div className="flex flex-wrap items-center gap-3 pb-3">
+                      <button
+                        type="button"
+                        onClick={() => void handleGenerateScene()}
+                        disabled={sceneStatus === 'loading'}
+                        className="rounded-full border-[1.5px] border-ft-purple px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ft-purple transition-colors duration-[250ms] ease-ft hover:bg-ft-purple hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/50 disabled:cursor-wait disabled:opacity-50"
+                      >
+                        {sceneStatus === 'loading' ? 'Dreaming up a scene…' : '✦ New scene idea'}
+                      </button>
+                      <span className="font-mono text-[10px] text-ft-ink/40">
+                        {sceneStatus === 'error'
+                          ? 'Idea engine unreachable — is the Gemini key configured? You can still write your own.'
+                          : 'Uses your Section 01 look — a fresh idea every time.'}
+                      </span>
+                    </div>
                   )}
                   {renderSectionFields(section)}
                 </Accordion>
@@ -370,7 +460,8 @@ export default function App() {
           charCap={CHAR_CAP}
           capMode={state.capMode}
           onToggleCapMode={() => dispatch({ type: 'TOGGLE_CAP_MODE' })}
-          onCompose={handleCompose}
+          onCompose={() => void handleCompose()}
+          composing={composing}
           onEditDraft={() => dispatch({ type: 'CLEAR_COMPOSED' })}
           onCopy={() => state.composed && handleCopy(state.composed)}
           onArchive={() => state.composed && dispatch({ type: 'ARCHIVE_PROMPT', prompt: state.composed })}

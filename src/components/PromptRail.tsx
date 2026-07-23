@@ -15,6 +15,7 @@ interface PromptRailProps {
   capMode: boolean
   onToggleCapMode: () => void
   onCompose: () => void
+  composing: boolean
   onEditDraft: () => void
   onCopy: () => void
   onArchive: () => void
@@ -35,6 +36,7 @@ export function PromptRail({
   capMode,
   onToggleCapMode,
   onCompose,
+  composing,
   onEditDraft,
   onCopy,
   onArchive,
@@ -141,11 +143,11 @@ export function PromptRail({
             </label>
             <button
               type="button"
-              disabled={empty}
+              disabled={empty || composing}
               onClick={onCompose}
               className="mt-4 w-full rounded-[6px] bg-ft-purple py-3.5 font-mono text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors duration-[250ms] ease-ft hover:bg-ft-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
             >
-              Compose prompt
+              {composing ? 'Composing…' : 'Compose prompt'}
             </button>
           </div>
         </>
