@@ -16,8 +16,10 @@ import {
 } from './lib/storage'
 import type { Approach, ArchivedPrompt, DraftPayload } from './lib/storage'
 import type { Field, Preset, Section } from './data/world'
+import { enableTracking, loadConsent, saveConsent } from './lib/consent'
 import { Header } from './components/Header'
 import { IntroModal } from './components/IntroModal'
+import { ConsentBanner } from './components/ConsentBanner'
 import { Accordion } from './components/Accordion'
 import { Footer } from './components/Footer'
 import { PresetGrid } from './components/PresetGrid'
@@ -153,10 +155,23 @@ export default function App() {
   const [openSectionIds, setOpenSectionIds] = useState<string[]>(() =>
     WORLD.sections[0] ? [WORLD.sections[0].id] : [],
   )
+  const [showConsent, setShowConsent] = useState(() => loadConsent() === null)
 
   useEffect(() => {
     dispatch({ type: 'HYDRATE', draft: loadDraft(), archive: loadArchive() })
+    if (loadConsent() === 'granted') enableTracking()
   }, [])
+
+  const acceptConsent = () => {
+    saveConsent('granted')
+    enableTracking()
+    setShowConsent(false)
+  }
+
+  const declineConsent = () => {
+    saveConsent('denied')
+    setShowConsent(false)
+  }
 
   useEffect(() => {
     if (!state.hydrated) return
@@ -395,6 +410,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-ft-beige text-ft-ink">
       {showIntro && <IntroModal onClose={closeIntro} />}
+      {showConsent && <ConsentBanner onAccept={acceptConsent} onDecline={declineConsent} />}
       <div className="lg:grid lg:grid-cols-[1fr_420px]">
         <div className="min-w-0">
           <Header composeCount={composeCount} onReset={handleReset} onShowIntro={() => setShowIntro(true)} />
