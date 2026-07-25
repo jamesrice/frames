@@ -8,8 +8,10 @@ export function Header({ composeCount, onReset, onShowIntro }: HeaderProps) {
   return (
     <header className="flex items-start justify-between gap-6 px-6 pb-5 pt-5 lg:px-10">
       <div className="min-w-0">
-        <h1 className="font-gilroy text-3xl font-bold uppercase leading-none tracking-tight lg:text-4xl">Imagology</h1>
-        <p className="mt-1.5 max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.15em] text-ft-ink/85">
+        <h1 className="leading-none">
+          <img src="/imagology.svg" alt="Imagology" className="h-12 w-auto lg:h-14" />
+        </h1>
+        <p className="mt-3 max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.15em] text-ft-ink/85">
           Explore prompting for photography. Built as example of custom, brand controlled image generation.
         </p>
       </div>
