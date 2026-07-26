@@ -448,7 +448,7 @@ export default function App() {
                       </button>
                       <span className="font-mono text-[10px] text-ft-ink/65">
                         {sceneStatus === 'error'
-                          ? 'Idea engine unreachable — is the Gemini key configured? You can still write your own.'
+                          ? 'Idea engine is busy — give it a moment and try again, or write your own.'
                           : 'Uses your Section 01 look — a fresh idea every time.'}
                       </span>
                     </div>

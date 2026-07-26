@@ -48,6 +48,7 @@ async function callGemini(
   key: string,
   prompt: string,
   generationConfig: Record<string, unknown>,
+  attempt = 0,
 ): Promise<{ text: string | null; status: number }> {
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -57,7 +58,14 @@ async function callGemini(
       generationConfig,
     }),
   })
-  if (!res.ok) return { text: null, status: res.status }
+  if (!res.ok) {
+    // Retry once on transient upstream failures (rate limit / server error).
+    if ((res.status === 429 || res.status >= 500) && attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)))
+      return callGemini(key, prompt, generationConfig, attempt + 1)
+    }
+    return { text: null, status: res.status }
+  }
   const data = (await res.json()) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[]
   }
