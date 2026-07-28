@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:functions": "vite build && wrangler pages dev dist --port 8788",
-    "deploy": "vite build && wrangler pages deploy dist --project-name frames"
+    "deploy": "vite build && wrangler pages deploy dist --project-name imagology"
   },
   "dependencies": {
     "react": "^19.2.0",
