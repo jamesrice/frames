@@ -61,6 +61,11 @@ async function callGemini(
     }),
   })
   if (!res.ok) {
+    // Surface the upstream reason in the deployment logs. Without this, a bad
+    // request is indistinguishable from a dead model — both just read as a
+    // status code, which cost real time to diagnose once already.
+    const detail = await res.text().catch(() => '')
+    console.error(`Gemini ${res.status} (attempt ${attempt}): ${detail.slice(0, 500)}`)
     // Retry once on transient upstream failures (rate limit / server error).
     if ((res.status === 429 || res.status >= 500) && attempt < 2) {
       await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)))
@@ -143,7 +148,6 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
         responseMimeType: 'application/json',
         responseSchema: SCENE_SCHEMA,
         maxOutputTokens: 2048,
-        thinkingConfig: { thinkingBudget: 0 },
       })
       if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
       const parsed = JSON.parse(text) as Record<string, unknown>
@@ -163,7 +167,6 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
       const { text, status } = await callGemini(key, composePrompt(body), {
         temperature: 0.9,
         maxOutputTokens: 2048,
-        thinkingConfig: { thinkingBudget: 0 },
       })
       if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
       return jsonResponse({ prompt: text.trim() })
