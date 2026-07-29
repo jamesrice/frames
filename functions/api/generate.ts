@@ -23,7 +23,9 @@ interface ComposeRequest {
 
 type GenerateRequest = SceneRequest | ComposeRequest
 
-const MODEL = 'gemini-2.5-flash'
+// Alias that tracks the current Flash model. Pinning an explicit version is what
+// broke this: gemini-2.5-flash was retired for new API keys and started 404ing.
+const MODEL = 'gemini-flash-latest'
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
 
 const SCENE_SCHEMA = {
