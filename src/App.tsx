@@ -151,6 +151,7 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(() => !loadIntroSeen())
   const [composeCount, setComposeCount] = useState(() => loadComposeCount())
   const [sceneStatus, setSceneStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [sceneError, setSceneError] = useState<string | null>(null)
   const [composing, setComposing] = useState(false)
   const [openSectionIds, setOpenSectionIds] = useState<string[]>(() =>
     WORLD.sections[0] ? [WORLD.sections[0].id] : [],
@@ -284,10 +285,12 @@ export default function App() {
       specString: preset?.specString ?? null,
       moodCues,
     })
-    if (idea) {
-      dispatch({ type: 'SET_SCENE', scene: idea })
+    if (idea.ok) {
+      dispatch({ type: 'SET_SCENE', scene: idea.value })
+      setSceneError(null)
       setSceneStatus('idle')
     } else {
+      setSceneError(idea.error)
       setSceneStatus('error')
     }
   }
@@ -310,7 +313,11 @@ export default function App() {
 
     setComposing(true)
     const rich = await generateRichPrompt({ decisions, scene, capMode: state.capMode })
-    const composed = rich ?? composePrompt({ text: state.text, selections: state.selections })
+    // Compose degrades gracefully to the local builder, so a failure here is not
+    // surfaced — the person still gets a usable prompt.
+    const composed = rich.ok
+      ? rich.value
+      : composePrompt({ text: state.text, selections: state.selections })
     setComposing(false)
     if (!composed) return
     dispatch({ type: 'COMPOSE', composed })
@@ -448,7 +455,7 @@ export default function App() {
                       </button>
                       <span className="font-mono text-[10px] text-ft-ink/65">
                         {sceneStatus === 'error'
-                          ? 'Idea engine is busy — give it a moment and try again, or write your own.'
+                          ? (sceneError ?? 'Idea engine is busy — try again, or write your own.')
                           : 'Uses your Section 01 look — a fresh idea every time.'}
                       </span>
                     </div>

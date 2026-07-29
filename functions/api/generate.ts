@@ -46,6 +46,30 @@ function jsonResponse(payload: unknown, status = 200): Response {
   })
 }
 
+// Deliberately HTTP 200 with an error payload rather than 5xx.
+//
+// This Function is served through the fictiontribe.com zone, and Cloudflare
+// replaces the body of any 5xx origin response with its own "error code: 502"
+// page. That silently destroyed our JSON, leaving the browser (and curl) with
+// no way to see why generation failed. 4xx passes through untouched; 5xx does
+// not. Returning 200 keeps the reason readable end to end.
+//
+// The real status is still recorded in the deployment logs via console.error.
+function errorResponse(error: string): Response {
+  return jsonResponse({ error }, 200)
+}
+
+// Turn an upstream status into something a person can act on. Deliberately
+// avoids echoing raw Gemini text to end users; the detail goes to the logs.
+function upstreamMessage(status: number): string {
+  if (status === 429) return 'The idea engine is rate-limited right now — try again in a moment.'
+  if (status === 404) return 'The idea engine model is unavailable — it may have been retired.'
+  if (status === 400) return 'The idea engine rejected this request — its configuration needs updating.'
+  if (status === 401 || status === 403) return 'The idea engine key was rejected.'
+  if (status >= 500) return 'The idea engine is temporarily unavailable — try again shortly.'
+  return 'The idea engine could not generate anything just now.'
+}
+
 async function callGemini(
   key: string,
   prompt: string,
@@ -130,7 +154,8 @@ function composePrompt(body: ComposeRequest): string {
 export const onRequestPost = async (context: PagesContext): Promise<Response> => {
   const key = context.env.GEMINI_API_KEY
   if (!key) {
-    return jsonResponse({ error: 'GEMINI_API_KEY is not configured for this deployment' }, 503)
+    console.error('GEMINI_API_KEY is not bound to this deployment')
+    return errorResponse('The idea engine is not configured for this deployment.')
   }
 
   let body: GenerateRequest
@@ -149,11 +174,12 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
         responseSchema: SCENE_SCHEMA,
         maxOutputTokens: 2048,
       })
-      if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
+      if (!text) return errorResponse(upstreamMessage(status))
       const parsed = JSON.parse(text) as Record<string, unknown>
       const fields = ['subject', 'environment', 'action', 'lightAtmosphere'] as const
       if (!fields.every((field) => typeof parsed[field] === 'string')) {
-        return jsonResponse({ error: 'Malformed generation output' }, 502)
+        console.error(`Malformed scene output: ${text.slice(0, 300)}`)
+        return errorResponse('The idea engine returned something unusable — try again.')
       }
       return jsonResponse({
         subject: parsed.subject,
@@ -168,11 +194,12 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
         temperature: 0.9,
         maxOutputTokens: 2048,
       })
-      if (!text) return jsonResponse({ error: `Generation failed (upstream ${status})` }, 502)
+      if (!text) return errorResponse(upstreamMessage(status))
       return jsonResponse({ prompt: text.trim() })
     }
-  } catch {
-    return jsonResponse({ error: 'Generation failed' }, 502)
+  } catch (err) {
+    console.error(`Unhandled generation failure: ${String(err)}`)
+    return errorResponse('The idea engine could not generate anything just now.')
   }
 
   return jsonResponse({ error: 'Unknown mode' }, 400)
