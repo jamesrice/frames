@@ -172,7 +172,8 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
         topP: 0.95,
         responseMimeType: 'application/json',
         responseSchema: SCENE_SCHEMA,
-        maxOutputTokens: 2048,
+        // Headroom for the thinking model's reasoning tokens plus the JSON fields.
+        maxOutputTokens: 4096,
       })
       if (!text) return errorResponse(upstreamMessage(status))
       const parsed = JSON.parse(text) as Record<string, unknown>
@@ -192,7 +193,11 @@ export const onRequestPost = async (context: PagesContext): Promise<Response> =>
     if (body.mode === 'compose') {
       const { text, status } = await callGemini(key, composePrompt(body), {
         temperature: 0.9,
-        maxOutputTokens: 2048,
+        // gemini-flash-latest is a thinking model: composing a 170-230 word
+        // paragraph burns ~3400 reasoning tokens BEFORE the prose. 2048 truncated
+        // the final prompt mid-sentence in production. 8192 leaves ample headroom
+        // (it's a ceiling, not usage, so the margin is free).
+        maxOutputTokens: 8192,
       })
       if (!text) return errorResponse(upstreamMessage(status))
       return jsonResponse({ prompt: text.trim() })
