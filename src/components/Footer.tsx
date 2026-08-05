@@ -7,7 +7,7 @@ const NAV = [
 
 export function Footer() {
   return (
-    <footer className="mt-4 bg-ft-ink px-6 py-12 text-white lg:px-10">
+    <footer className="mt-4 bg-[#0F172A] px-6 py-12 text-white lg:px-10">
       <div className="flex flex-wrap items-end justify-between gap-8">
         <div>
           <p className="font-mono text-[13px] uppercase tracking-[0.15em]">
