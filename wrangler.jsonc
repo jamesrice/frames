@@ -1,0 +1,27 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "imagology",
+	"main": "worker/index.ts",
+	"compatibility_date": "2025-10-01",
+	"observability": {
+		"enabled": true
+	},
+	// imagology.fictiontribe.com — the zone is fictiontribe.com. NOTE: the deploy
+	// can only attach this domain once the old "imagology" Pages project
+	// (frames-4bz.pages.dev) is deleted in the dashboard — until then `wrangler
+	// deploy` fails on the route step.
+	"routes": [
+		{
+			"pattern": "imagology.fictiontribe.com",
+			"custom_domain": true
+		}
+	],
+	// Next.js static export, served by the Worker (no separate frontend host).
+	// run_worker_first keeps /api/* on the Worker; everything else is assets.
+	"assets": {
+		"directory": "./out",
+		"binding": "ASSETS",
+		"run_worker_first": ["/api/*"]
+	}
+	// Secret, set once per environment: wrangler secret put GEMINI_API_KEY
+}
