@@ -1,15 +1,36 @@
+const NAV = [
+  { label: 'Imagology', href: null },
+  { label: 'ShotVault', href: 'https://shotvault.fictiontribe.com' },
+  { label: 'Shotcaller', href: 'https://shotcaller.fictiontribe.com' },
+  { label: 'StitchBox', href: 'https://stitchbox.fictiontribe.com' },
+]
+
 export function Footer() {
   return (
-    <footer className="mt-4 flex items-center justify-between gap-4 border-t border-ft-ink/10 px-6 py-8 lg:px-10">
-      <a
-        href="https://fictiontribe.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="A product of Fiction Tribe"
-        className="group flex items-center gap-2.5 text-ft-ink/75 transition-colors duration-[250ms] ease-ft hover:text-ft-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/40 rounded"
-      >
-        <span className="select-none font-mono text-[10px] font-medium uppercase tracking-[0.14em]">A product of</span>
-        <svg
+    <footer className="mt-4 bg-ft-ink px-6 py-12 text-white lg:px-10">
+      <div className="flex flex-wrap items-end justify-between gap-8">
+        <div>
+          <p className="font-mono text-[13px] uppercase tracking-[0.15em]">
+            イマゴロジー — Imagology
+          </p>
+          <p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-white/70">
+            Built to show what brand-controlled image generation looks like. Dial in a look,
+            compose the prompt — the taste is in the guardrails.
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-3.5">
+          <span className="select-none font-mono text-[11px] uppercase tracking-[0.15em] text-white/55">
+            Running on Gemini 3.6 Flash
+          </span>
+          <a
+            href="https://fictiontribe.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="A product of Fiction Tribe"
+            className="group flex items-center gap-3 text-white/75 transition-colors duration-[250ms] ease-ft hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ft-purple/40 rounded"
+          >
+            <span className="select-none font-mono text-[11px] uppercase tracking-[0.18em]">A product of</span>
+            <svg
           className="h-3.5 w-auto"
           viewBox="0 0 227 28"
           fill="none"
@@ -37,10 +58,29 @@ export function Footer() {
             </clipPath>
           </defs>
         </svg>
-      </a>
-      <span className="select-none font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-ft-ink/55">
-        Running on Gemini 2.5
-      </span>
+          </a>
+        </div>
+      </div>
+      <nav
+        aria-label="Fiction Tribe tools"
+        className="mt-9 flex flex-wrap gap-x-7 gap-y-3 border-t border-white/15 pt-5 font-mono text-[11px] uppercase tracking-[0.15em]"
+      >
+        {NAV.map((item) =>
+          item.href ? (
+            <a
+              key={item.label}
+              href={item.href}
+              className="text-white/75 underline underline-offset-[3px] transition-colors duration-[250ms] ease-ft hover:text-white"
+            >
+              {item.label}
+            </a>
+          ) : (
+            <span key={item.label} aria-current="page" className="text-white/45">
+              {item.label}
+            </span>
+          ),
+        )}
+      </nav>
     </footer>
   )
 }
